@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="manifest" href="/manifest.json">
+    <title>广州汗马电子 - LED外贸新人专业学习工作台 & 智能CRM系统</title>
+    <style>
+        :root {
+            --sidebar-bg: #0d1b2a;
+            --sidebar-hover: #1b263b;
+            --primary: #0284c7;
+            --primary-light: #e0f2fe;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* Left Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: #fff; padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+        .brand { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+        .brand-logo { width: 36px; height: 36px; background: #38bdf8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .menu { list-style: none; margin-top: 15px; }
+        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #94a3b8; cursor: pointer; transition: 0.2s; position: relative; }
+        .menu-item:hover, .menu-item.active { background: var(--sidebar-hover); color: #fff; }
+        .menu-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #38bdf8; }
+        .badge { background: #0284c7; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: auto; }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Forms & Inputs */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        label { font-size: 0.85rem; font-weight: bold; color: var(--text-sub); display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: #fff; }
+        textarea { height: 80px; resize: vertical; }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn:hover { background: #0369a1; }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        /* Vocabulary & Audio UI */
+        .term-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .term-card { border: 1px solid var(--border); border-radius: 8px; padding: 15px; position: relative; }
+        .term-tag { font-size: 0.75rem; background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+
+        /* Images Preview */
+        .img-preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .img-preview { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); }
+
+        /* Report Modal / Preview */
+        #reportOutput { background: #f8fafc; padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-top: 15px; white-space: pre-wrap; font-family: monospace; font-size: 0.85rem; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-logo">⚡</div>
+            <div>
+                <div style="font-weight:bold; font-size:1rem;">汗马电子 HANMA</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">LED 外贸工作台 Pro</div>
+            </div>
+        </div>
+        <ul class="menu">
+            <li class="menu-item active" onclick="switchTab(this, 'dashboard')">📊 工作台概览</li>
+            <li class="menu-item" onclick="switchTab(this, 'crm')">👥 智能CRM与客户调查</li>
+            <li class="menu-item" onclick="switchTab(this, 'vocab-reading')">📖 LED情境复习短文</li>
+            <li class="menu-item" onclick="switchTab(this, 'vocab-bank')">📚 LED专业术语词库</li>
+            <li class="menu-item" onclick="switchTab(this, 'dialogue')">💬 接单情境对话实战</li>
+            <li class="menu-item" onclick="switchTab(this, 'certification')">🛡️ 汗马产品与国际认证</li>
+            <li class="menu-item" onclick="switchTab(this, 'quiz')">✏️ 外贸实战测验</li>
+            <li class="menu-item" onclick="switchTab(this, 'notebook')">📌 我的生词本 <span class="badge" id="vocabBadge">0</span></li>
+            <li class="menu-item" onclick="switchTab(this, 'ai-reply')">🤖 AI 外贸回复助手</li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- 1. 工作台概览 -->
+        <section id="dashboard" class="tab-page">
+            <div class="card" style="background: linear-gradient(135deg, #0284c7, #0f172a); color: white;">
+                <h2 style="margin-bottom:8px;">欢迎使用 LED 车灯外贸实战与客户调查工作台</h2>
+                <p style="font-size:0.9rem; opacity:0.9;">涵盖广州汗马电子核心产品、海关数据调取记录、全网调查归档与外贸实战词汇。</p>
+            </div>
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-title">👥 已归档客户</div>
+                    <h2 id="custCount">0</h2>
+                </div>
+                <div class="card">
+                    <div class="card-title">📚 专业术语库</div>
+                    <h2>20+ 项</h2>
+                </div>
+                <div class="card">
+                    <div class="card-title">📌 生词积累</div>
+                    <h2 id="dashVocabCount">0 个</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 智能CRM与背景调查 -->
+        <section id="crm" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">
+                    <span>👥 新建客户档案 & 背景调查</span>
+                    <button class="btn btn-secondary" onclick="generateCustCode()">自动生成客户编码</button>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label>客户编码</label>
+                        <input type="text" id="cCode" readonly style="background:#f1f5f9;">
+                    </div>
+                    <div>
+                        <label>客户/公司名称</label>
+                        <input type="text" id="cName" placeholder="例如：AutoLighting Europe B.V.">
+                    </div>
+                    <div>
+                        <label>国家/地区</label>
+                        <input type="text" id="cCountry" placeholder="例如：Netherlands">
+                    </div>
+                    <div>
+                        <label>主营产品类型</label>
+                        <input type="text" id="cProduct" placeholder="例如：LED Headlight, Work Light">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label>官网与全网社交媒体链接</label>
+                        <input type="text" id="cWeb" placeholder="https://... / LinkedIn / Facebook">
+                    </div>
+                    <div>
+                        <label>海关数据/估计年采购量</label>
+                        <input type="text" id="cImports" placeholder="例如：约 15 Containers/Year, 主要进口 LED 警示灯">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <label>背景调查综合分析 (AI协助/全网检索备注)</label>
+                    <textarea id="cAnalysis" placeholder="客户主要在欧洲做改装，对 E-mark (ECE R10) 认证有强制要求，偏好 7 英寸圆形工作灯..."></textarea>
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <label>上传客户产品图/海关数据/调查截图</label>
+                    <input type="file" id="cImages" multiple accept="image/*" onchange="previewImages(event)">
+                    <div class="img-preview-container" id="imgPreview"></div>
+                </div>
+
+                <button class="btn" onclick="saveCustomer()">💾 保存客户档案</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <span>📋 客户数据库</span>
+                    <input type="text" id="cSearch" placeholder="🔍 搜索编码、名称或国家..." style="width:220px;" oninput="searchCustomers()">
+                </div>
+                <div id="customerList"></div>
+            </div>
+        </section>
+
+        <!-- 3. 情境短文 -->
+        <section id="vocab-reading" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">📖 LED 外贸情境短文学习</div>
+                <p style="font-size:0.88rem; color:var(--text-sub); margin-bottom:15px;">双击文中任意英文单词可直接添加至生词本。</p>
+                <div style="line-height:1.8; font-size:0.95rem; background:#f8fafc; padding:15px; border-radius:8px; border:1px solid var(--border);">
+                    Guangzhou Hanma Electronics is an esteemed manufacturer in the automotive LED aftermarket. 
+                    When responding to client inquiries regarding <span style="color:var(--primary); font-weight:bold;">automotive LED headlights</span>, 
+                    our sales team must highlight technical specs like <span style="color:var(--primary); font-weight:bold;">luminous efficacy</span> and 
+                    <span style="color:var(--primary); font-weight:bold;">heat dissipation</span>.
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. LED 术语词库 -->
+        <section id="vocab-bank" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">📚 LED 外贸专业术语分类词库</div>
+                <div class="term-grid">
+                    <div class="term-card">
+                        <span class="term-tag">技术参数</span>
+                        <h3>Luminous Efficacy</h3>
+                        <p style="color:var(--text-sub); font-size:0.85rem; margin:6px 0;">发光效率 (LM/W)</p>
+                        <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="addVocabDirect('Luminous Efficacy')">+ 加入生词本</button>
+                    </div>
+                    <div class="term-card">
+                        <span class="term-tag">认证规范</span>
+                        <h3>ECE R10</h3>
+                        <p style="color:var(--text-sub); font-size:0.85rem; margin:6px 0;">欧洲电磁兼容认证 (EMC)</p>
+                        <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="addVocabDirect('ECE R10')">+ 加入生词本</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 接单对话 -->
+        <section id="dialogue" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">💬 外贸业务实战对话与沟通模板</div>
+                <div style="background:#f1f5f9; padding:12px; border-radius:6px; margin-bottom:10px;">
+                    <strong>Buyer:</strong> "Hi Hanma team, do your LED work lights come with ECE R10 approval for European roads?"
+                </div>
+                <div style="background:#e0f2fe; padding:12px; border-radius:6px;">
+                    <strong>Hanma Sales:</strong> "Dear Client, yes! Our featured LED work lights are fully certified with ECE R10 and E-mark E9."
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 产品与认证 -->
+        <section id="certification" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">🛡️ 汗马产品阵容与国际认证指南</div>
+                <div class="form-grid">
+                    <div style="border:1px solid var(--border); padding:15px; border-radius:8px;">
+                        <h3>E-mark (ECE R10 / R112)</h3>
+                        <p style="font-size:0.85rem; color:var(--text-sub); margin-top:5px;">欧洲道路交通合规强制认证，无电磁干扰。</p>
+                    </div>
+                    <div style="border:1px solid var(--border); padding:15px; border-radius:8px;">
+                        <h3>DOT / SAE Compliance</h3>
+                        <p style="font-size:0.85rem; color:var(--text-sub); margin-top:5px;">美国交通部认证，北美路权必备。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. 测验 -->
+        <section id="quiz" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">✏️ 外贸实战测验</div>
+                <p>1. 欧洲客户询问车灯防干扰能力，需提供什么认证？</p>
+                <div style="margin-top:10px;">
+                    <button class="btn btn-secondary" onclick="alert('正确！ECE R10 专门针对电磁兼容性。')">A. ECE R10</button>
+                    <button class="btn btn-secondary" onclick="alert('错误，FDA 为美国食品药品认证。')">B. FDA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. 生词本 -->
+        <section id="notebook" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">📌 我的生词本</div>
+                <ul id="vocabList" style="list-style:none;"></ul>
+            </div>
+        </section>
+
+        <!-- 9. AI 回复助手 -->
+        <section id="ai-reply" class="tab-page" style="display:none;">
+            <div class="card">
+                <div class="card-title">🤖 AI 外贸智能回复助手</div>
+                <textarea placeholder="粘贴国外买家的询盘邮件..."></textarea>
+                <button class="btn" style="margin-top:10px;" onclick="alert('已生成针对汗马产品特性的专业回复！')">⚡ 生成外贸英文回复邮件</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // 1. Tab 切换逻辑
+        function switchTab(el, pageId) {
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-page').forEach(p => p.style.display = 'none');
+            el.classList.add('active');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        // 2. CRM 客户管理逻辑
+        let customers = JSON.parse(localStorage.getItem('hm_customers_v2') || '[]');
+        let currentUploadedImages = [];
+
+        function generateCustCode() {
+            const randomId = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('cCode').value = `HM-CUST-2026-${randomId}`;
+        }
+
+        function previewImages(e) {
+            const files = e.target.files;
+            currentUploadedImages = [];
+            const container = document.getElementById('imgPreview');
+            container.innerHTML = '';
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    currentUploadedImages.push(evt.target.result);
+                    const img = document.createElement('img');
+                    img.src = evt.target.result;
+                    img.className = 'img-preview';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function saveCustomer() {
+            const code = document.getElementById('cCode').value || `HM-CUST-2026-${Math.floor(1000+Math.random()*9000)}`;
+            const name = document.getElementById('cName').value;
+            if(!name) return alert('请输入客户名称！');
+
+            const cust = {
+                id: Date.now(),
+                code: code,
+                name: name,
+                country: document.getElementById('cCountry').value,
+                product: document.getElementById('cProduct').value,
+                web: document.getElementById('cWeb').value,
+                imports: document.getElementById('cImports').value,
+                analysis: document.getElementById('cAnalysis').value,
+                images: currentUploadedImages
+            };
+
+            customers.push(cust);
+            localStorage.setItem('hm_customers_v2', JSON.stringify(customers));
+            alert('客户档案添加成功！');
+            resetCRMForm();
+            renderCustomers(customers);
+        }
+
+        function resetCRMForm() {
+            document.getElementById('cCode').value = '';
+            document.getElementById('cName').value = '';
+            document.getElementById('cCountry').value = '';
+            document.getElementById('cProduct').value = '';
+            document.getElementById('cWeb').value = '';
+            document.getElementById('cImports').value = '';
+            document.getElementById('cAnalysis').value = '';
+            document.getElementById('imgPreview').innerHTML = '';
+            currentUploadedImages = [];
+        }
+
+        function renderCustomers(data) {
+            const container = document.getElementById('customerList');
+            container.innerHTML = '';
+            document.getElementById('custCount').innerText = data.length;
+
+            data.forEach(item => {
+                let imgHTML = (item.images || []).map(img => `<img src="${img}" class="img-preview">`).join('');
+                container.innerHTML += `
+                    <div style="border:1px solid var(--border); padding:15px; border-radius:8px; margin-top:10px; background:#fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="background:var(--primary-light); color:var(--primary); font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold;">${item.code}</span>
+                            <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="exportSingleReport(${item.id})">📄 生成独立汇报档案表</button>
+                        </div>
+                        <h3 style="margin:8px 0; font-size:1.05rem;">${item.name} (${item.country || '未填写'})</h3>
+                        <div style="font-size:0.85rem; color:var(--text-sub);">
+                            <p><strong>主营产品:</strong> ${item.product || '-'}</p>
+                            <p><strong>全网/官网:</strong> ${item.web || '-'}</p>
+                            <p><strong>海关/采购量:</strong> ${item.imports || '-'}</p>
+                            <p><strong>背景分析:</strong> ${item.analysis || '-'}</p>
+                        </div>
+                        <div class="img-preview-container">${imgHTML}</div>
+                        <div style="margin-top:10px; text-align:right;">
+                            <button onclick="deleteCustomer(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.8rem;">删除档案</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function searchCustomers() {
+            const q = document.getElementById('cSearch').value.toLowerCase();
+            const filtered = customers.filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) || c.country.toLowerCase().includes(q));
+            renderCustomers(filtered);
+        }
+
+        function deleteCustomer(id) {
+            if(confirm('确定删除此客户档案？')) {
+                customers = customers.filter(c => c.id !== id);
+                localStorage.setItem('hm_customers_v2', JSON.stringify(customers));
+                renderCustomers(customers);
+            }
+        }
+
+        // 3. 导出独立汇报表格
+        function exportSingleReport(id) {
+            const c = customers.find(item => item.id === id);
+            if(!c) return;
+
+            const win = window.open('', '_blank');
+            const imgHTML = (c.images || []).map(img => `<img src="${img}" style="max-width:200px; height:auto; border:1px solid #ccc; border-radius:4px; margin:5px;">`).join('');
+
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>客户档案汇报表 - ${c.name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+                        h2 { text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 10px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: left; font-size: 0.9rem; }
+                        th { background: #f1f5f9; width: 20%; }
+                        .img-box { margin-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>广州汗马电子 - 客户背景调查与分析档案表</h2>
+                    <table>
+                        <tr><th>客户编码</th><td>${c.code}</td></tr>
+                        <tr><th>客户公司名称</th><td>${c.name}</td></tr>
+                        <tr><th>国家 / 地区</th><td>${c.country || '未设定'}</td></tr>
+                        <tr><th>主营产品</th><td>${c.product || '未设定'}</td></tr>
+                        <tr><th>官网 / 社交媒体</th><td>${c.web || '未设定'}</td></tr>
+                        <tr><th>海关数据 / 年采购量</th><td>${c.imports || '未设定'}</td></tr>
+                        <tr><th>全网调查与综合分析</th><td>${c.analysis || '未设定'}</td></tr>
+                        <tr><th>相关截图 / 资料图</th><td><div class="img-box">${imgHTML || '无截图数据'}</div></td></tr>
+                    </table>
+                    <div style="margin-top:20px; text-align:right;">
+                        <button onclick="window.print()" style="padding:8px 16px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer;">🖨️ 打印 / 保存为 PDF 汇报</button>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // 4. 生词本逻辑
+        let vocab = JSON.parse(localStorage.getItem('hm_vocab') || '[]');
+        function updateVocabUI() {
+            const list = document.getElementById('vocabList');
+            list.innerHTML = '';
+            vocab.forEach(item => {
+                list.innerHTML += `<li style="padding:8px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;"><span>${item}</span><button onclick="removeVocab('${item}')" style="color:red; border:none; background:none; cursor:pointer;">✕</button></li>`;
+            });
+            document.getElementById('vocabBadge').innerText = vocab.length;
+            document.getElementById('dashVocabCount').innerText = `${vocab.length} 个`;
+            localStorage.setItem('hm_vocab', JSON.stringify(vocab));
+        }
+
+        function addVocabDirect(word) {
+            if(!vocab.includes(word)) {
+                vocab.push(word);
+                updateVocabUI();
+                alert(`已将 "${word}" 添加至生词本！`);
+            }
+        }
+
+        function removeVocab(word) {
+            vocab = vocab.filter(w => w !== word);
+            updateVocabUI();
+        }
+
+        document.addEventListener('dblclick', function() {
+            const sel = window.getSelection().toString().trim();
+            if(sel && /^[a-zA-Z\s-]+$/.test(sel) && sel.length > 1) {
+                addVocabDirect(sel);
+            }
+        });
+
+        // 初始化
+        generateCustCode();
+        renderCustomers(customers);
+        updateVocabUI();
+
+        // Service worker 注册（如果存在）
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js').catch(e => console.log('SW 注册失败', e));
+        }
+    </script>
+</body>
+</html>
