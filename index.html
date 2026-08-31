@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0284c7">
-    <link rel="manifest" href="/manifest.json">
     <title>广州汗马电子 - LED外贸新人专业学习工作台 & 智能CRM系统</title>
     <style>
         :root {
@@ -465,11 +463,2054 @@
         generateCustCode();
         renderCustomers(customers);
         updateVocabUI();
-
-        // Service worker 注册（如果存在）
-        if('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js').catch(e => console.log('SW 注册失败', e));
-        }
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汗马电子 · 海外销售打卡学习工作台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f6f5f1;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 260px; min-width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e8e4d8;
+  display: flex; flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0,0,0,.03);
+}
+.brand { padding: 18px 16px 14px; border-bottom: 1px solid #f0eee7; }
+.brand-row { display: flex; align-items: center; gap: 10px; }
+.logo-dot {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg, #3a5a40, #588157);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(58,90,64,.25);
+}
+.brand-name { font-size: 15px; font-weight: 700; color: #1f2937; }
+.brand-sub  { font-size: 11px; color: #8b8579; margin-top: 2px; }
+.subnav { padding: 12px 14px 4px; font-size: 10px; color: #a8a195; letter-spacing: 1px; text-transform: uppercase; }
+.menu { flex: 1; overflow-y: auto; padding: 4px 10px 12px; }
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: #d8d3c5; border-radius: 3px; }
+.menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin: 3px 0;
+  border-radius: 10px; cursor: pointer;
+  font-size: 13px; color: #4b4639;
+  transition: all .16s ease; user-select: none;
+}
+.menu-item:hover { background: #f3efe3; }
+.menu-item .ico { font-size: 17px; width: 22px; text-align: center; }
+.menu-item .badge { margin-left: auto; font-size: 10px; padding: 2px 6px; border-radius: 999px; background: #e8e3d4; color: #6b6452; }
+.menu-item.active { background: linear-gradient(135deg, #3a5a40, #344e41); color: #fff; box-shadow: 0 6px 14px rgba(58,90,64,.22); }
+.menu-item.active .badge { background: rgba(255,255,255,.2); color: #fff; }
+.sidebar-foot { padding: 12px 14px; border-top: 1px solid #f0eee7; font-size: 10px; color: #a8a195; display: flex; justify-content: space-between; }
+
+/* ===== Main ===== */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: linear-gradient(180deg, #faf9f4, #f1efe7 60%, #ebe8dd); }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid #e8e4d8;
+  background: rgba(255,255,255,.65); backdrop-filter: blur(8px);
+}
+.crumbs { font-size: 12px; color: #8b8579; }
+.crumbs .now { color: #1f2937; font-weight: 600; margin-left: 6px; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.date-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: #fff; border: 1px solid #ece8db;
+  font-size: 12px; color: #4b4639;
+}
+.btn-sync {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #3a5a40, #588157);
+  color: #fff; font-size: 12px; font-weight: 500;
+  box-shadow: 0 6px 14px rgba(58,90,64,.22);
+}
+.btn-sync:hover { opacity: .95; }
+
+.content { flex: 1; overflow-y: auto; padding: 20px 22px 36px; }
+.content::-webkit-scrollbar { width: 7px; }
+.content::-webkit-scrollbar-thumb { background: #d8d3c5; border-radius: 4px; }
+
+/* Page header */
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; gap: 16px; flex-wrap: wrap; }
+.page-title { font-size: 20px; font-weight: 700; color: #1f2937; }
+.page-sub { font-size: 12px; color: #8b8579; margin-top: 5px; }
+.greet { background: linear-gradient(135deg, #3a5a40, #588157); color: #fff; padding: 13px 17px; border-radius: 12px; font-size: 12px; box-shadow: 0 8px 20px rgba(58,90,64,.22); }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.card { background: #fff; padding: 16px; border-radius: 14px; border: 1px solid #ece8db; box-shadow: 0 3px 10px rgba(58,90,64,.04); }
+.card .lbl { font-size: 11px; color: #8b8579; }
+.card .num { font-size: 26px; font-weight: 700; color: #1f2937; margin-top: 6px; }
+.card .num span { font-size: 13px; color: #8b8579; font-weight: 500; margin-left: 3px; }
+.card .trend { font-size: 11px; color: #588157; margin-top: 7px; }
+.card.tinted { background: linear-gradient(135deg, #3a5a40, #588157); color: #fff; border: none; }
+.card.tinted .lbl, .card.tinted .num span { color: rgba(255,255,255,.75); }
+.card.tinted .num { color: #fff; }
+
+/* Heatmap */
+.heatmap-card { background: #fff; padding: 18px 20px; border-radius: 14px; border: 1px solid #ece8db; margin-bottom: 18px; }
+.heatmap-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.heatmap-title { font-size: 14px; font-weight: 700; color: #1f2937; }
+.heatmap-sub { font-size: 11px; color: #8b8579; margin-top: 2px; }
+.heatmap-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
+.heat-cell { aspect-ratio: 1; border-radius: 3px; background: #eceae0; cursor: pointer; transition: transform .12s; }
+.heat-cell:hover { transform: scale(1.35); z-index: 2; }
+.heat-cell[data-level="1"] { background: #cfe1c9; }
+.heat-cell[data-level="2"] { background: #95b58a; }
+.heat-cell[data-level="3"] { background: #588157; }
+.heat-cell[data-level="4"] { background: #344e41; }
+.heat-cell.today { box-shadow: 0 0 0 2px #3a5a40 inset; }
+.heat-legend { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #8b8579; }
+.heat-legend span { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+
+/* Tasks */
+.tasks-card { background: #fff; padding: 18px 20px; border-radius: 14px; border: 1px solid #ece8db; margin-bottom: 18px; }
+.tasks-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.tasks-title { font-size: 14px; font-weight: 700; color: #1f2937; }
+.progress-bar { width: 120px; height: 7px; background: #eceae0; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #3a5a40, #588157); border-radius: 4px; transition: width .4s; }
+.progress-text { font-size: 11px; color: #6b6452; font-weight: 600; margin-left: 8px; }
+.task-list { list-style: none; }
+.task { display: flex; align-items: center; gap: 12px; padding: 12px 12px; margin-bottom: 7px; border-radius: 10px; background: #faf8f2; transition: all .15s; }
+.task:hover { background: #f3efe2; }
+.task.done { background: #eef3e9; }
+.task.done .task-text { text-decoration: line-through; color: #8b8579; }
+.task input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3a5a40; cursor: pointer; flex-shrink: 0; }
+.task-text { flex: 1; font-size: 13px; color: #1f2937; line-height: 1.4; }
+.task-meta { font-size: 10px; color: #6b6452; padding: 2px 8px; background: #fff; border-radius: 999px; border: 1px solid #ece8db; flex-shrink: 0; }
+.task-meta.eu { background: #e8f0fb; color: #2c4a82; border-color: #d3e0f3; }
+.task-meta.as { background: #fbf2e3; color: #a36619; border-color: #f0e1c4; }
+.task-meta.af { background: #f4e9e3; color: #8a4a2d; border-color: #ead6c9; }
+.task-meta.sa { background: #e9f4ea; color: #2e7d32; border-color: #d3e8d4; }
+.task-meta.au { background: #e8f4fb; color: #005f87; border-color: #c9e6f3; }
+.task-meta.nz { background: #e8fbf2; color: #0f6b3f; border-color: #c9f3de; }
+
+.add-task { display: flex; gap: 8px; margin-top: 12px; }
+.add-task input { flex: 1; padding: 10px 12px; border: 1px solid #ece8db; border-radius: 9px; background: #faf8f2; font-size: 12px; }
+.add-task input:focus { outline: none; border-color: #588157; background: #fff; }
+.add-task select { padding: 10px; border: 1px solid #ece8db; border-radius: 9px; background: #faf8f2; font-size: 12px; }
+.add-task button { padding: 10px 16px; border: none; border-radius: 9px; cursor: pointer; background: #3a5a40; color: #fff; font-size: 12px; }
+.add-task button:hover { background: #344e41; }
+
+/* Notes */
+.notes-card { background: #fff; padding: 18px 20px; border-radius: 14px; border: 1px solid #ece8db; }
+.notes-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.notes-title { font-size: 14px; font-weight: 700; }
+.notes-area { width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ece8db; border-radius: 10px; background: #faf8f2; font-size: 12px; font-family: inherit; resize: vertical; }
+.notes-area:focus { outline: none; border-color: #588157; background: #fff; }
+.notes-tip { font-size: 11px; color: #8b8579; margin-top: 8px; }
+
+/* Flashcards */
+.flashcard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.flashcard {
+  background: #fff; border: 1px solid #ece8db; border-radius: 14px; padding: 18px;
+  box-shadow: 0 3px 10px rgba(58,90,64,.04);
+  cursor: pointer; transition: transform .15s, box-shadow .15s;
+  position: relative; min-height: 140px;
+}
+.flashcard:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(58,90,64,.08); }
+.flashcard .term { font-size: 18px; font-weight: 700; color: #3a5a40; margin-bottom: 6px; }
+.flashcard .phonetic { font-size: 12px; color: #8b8579; margin-bottom: 10px; }
+.flashcard .meaning { font-size: 13px; color: #1f2937; line-height: 1.6; }
+.flashcard .badge-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.flashcard .badge-row span { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #eef3e9; color: #3a5a40; }
+.flashcard .flip-hint { position: absolute; bottom: 10px; right: 14px; font-size: 10px; color: #c7c1b1; }
+.flashcard.flipped .meaning { display: none; }
+.flashcard .detail { display: none; font-size: 12px; color: #4b4639; line-height: 1.7; }
+.flashcard.flipped .detail { display: block; }
+
+/* Cert cards */
+.cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.cert-card { background: #fff; border: 1px solid #ece8db; border-radius: 12px; padding: 16px; }
+.cert-card .code { font-size: 20px; font-weight: 700; color: #3a5a40; margin-bottom: 4px; }
+.cert-card .full { font-size: 11px; color: #8b8579; margin-bottom: 10px; }
+.cert-card .plain { font-size: 12px; color: #4b4639; line-height: 1.6; }
+.cert-card .tag { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #eef3e9; color: #3a5a40; display: inline-block; margin-bottom: 8px; }
+
+/* Plan / checklist */
+.plan-card { background: #fff; border: 1px solid #ece8db; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+.plan-card h3 { font-size: 14px; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.plan-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f4f1e6; }
+.plan-item:last-child { border-bottom: none; }
+.plan-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #3a5a40; margin-top: 2px; flex-shrink: 0; }
+.plan-item div { flex: 1; }
+.plan-item strong { font-size: 13px; color: #1f2937; }
+.plan-item p { font-size: 12px; color: #6b6452; margin-top: 2px; line-height: 1.4; }
+
+/* Social embed placeholders */
+.social-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+.social-card { background: #fff; border-radius: 14px; border: 1px solid #ece8db; padding: 18px; text-align: center; }
+.social-card .icon { font-size: 32px; margin-bottom: 10px; }
+.social-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.social-card p { font-size: 11px; color: #8b8579; line-height: 1.5; }
+.social-card ul { text-align: left; font-size: 12px; color: #4b4639; margin-top: 12px; padding-left: 18px; line-height: 1.8; }
+
+/* Section heading */
+.section-title { font-size: 16px; font-weight: 700; color: #1f2937; margin: 22px 0 14px; display: flex; align-items: center; gap: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 999px;
+  font-size: 12px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 99;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Confetti */
+.confetti { position: fixed; width: 7px; height: 12px; pointer-events: none; z-index: 100; }
+
+/* IELTS */
+.ielts-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 16px; }
+.ielts-day { background: #fff; border: 1px solid #ece8db; border-radius: 10px; padding: 10px; text-align: center; font-size: 11px; }
+.ielts-day .d { font-weight: 700; color: #3a5a40; margin-bottom: 6px; }
+.ielts-day .t { color: #6b6452; line-height: 1.4; }
+
+@media (max-width: 900px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; max-height: 200px; }
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .flashcard-grid, .cert-grid { grid-template-columns: 1fr; }
+  .social-grid, .ielts-week { grid-template-columns: repeat(2,1fr); }
+  .heatmap-grid { grid-template-columns: repeat(10, 1fr); }
+}
+
+/* ===== 同步弹窗样式 ===== */
+.sync-modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(58,90,64,0.55);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
+}
+.sync-modal {
+  background: #fefae0;
+  border-radius: 18px;
+  padding: 22px;
+  max-width: 460px; width: 100%;
+  max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+.sync-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.sync-title { font-size:18px; font-weight:700; color:#3a5a40; }
+.sync-close { background:none; border:none; font-size:22px; cursor:pointer; color:#8b8579; padding:0 8px; line-height:1; }
+.sync-close:hover { color:#3a5a40; }
+.sync-status { background: rgba(88,129,87,0.12); padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:16px; color:#3a5a40; }
+.sync-status.on { background:rgba(88,129,87,0.18); }
+.sync-status.off { background:rgba(139,133,121,0.12); color:#8b8579; }
+.sync-section { background:white; border-radius:12px; padding:14px; margin-bottom:12px; border:1px solid #eceae0; }
+.sync-section-title { font-size:14px; font-weight:600; color:#3a5a40; margin-bottom:4px; }
+.sync-section-desc { font-size:12px; color:#8b8579; margin-bottom:12px; line-height:1.5; }
+.sync-btn-row { display:flex; flex-wrap:wrap; gap:8px; }
+.sync-btn {
+  background:#f5f0e1; border:1px solid #d4cfc0;
+  border-radius:8px; padding:9px 12px;
+  font-size:12.5px; color:#3a5a40;
+  cursor:pointer; flex:1; min-width:110px;
+  transition:all 0.18s; font-family: inherit;
+}
+.sync-btn:hover { background:#ede5cf; transform:translateY(-1px); }
+.sync-btn.primary { background:#588157; color:white; border-color:#3a5a40; }
+.sync-btn.primary:hover { background:#3a5a40; }
+.sync-btn.danger { background:#c1452d; color:white; border-color:#a83923; }
+.sync-btn.danger:hover { background:#a83923; }
+.sync-btn.warn { background:#dda15e; color:white; border-color:#bc8a3e; }
+.sync-btn.warn:hover { background:#bc8a3e; }
+.sync-tip { background:rgba(221,161,94,0.12); padding:10px 12px; border-radius:8px; font-size:11.5px; color:#8b4513; margin-top:12px; line-height:1.5; }
+.sync-qr-box { text-align:center; padding:16px; }
+.sync-qr-box img { max-width:240px; width:100%; border-radius:10px; background:white; padding:8px; }
+.sync-qr-hint { margin-top:12px; color:#8b8579; font-size:12px; line-height:1.6; }
+.sync-cloud-id { background:#f5f0e1; padding:8px 10px; border-radius:6px; font-family:monospace; font-size:11px; word-break:break-all; color:#3a5a40; margin:8px 0; }
+.sync-steps { background:#f5f0e1; padding:10px 12px; border-radius:8px; font-size:12px; line-height:1.8; color:#3a5a40; margin:8px 0; }
+.sync-steps b { color:#c1452d; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.sync-card-row { display:flex; gap:10px; align-items:center; padding:12px; background:linear-gradient(135deg,#588157,#3a5a40); border-radius:12px; color:white; margin-bottom:18px; flex-wrap:wrap; }
+.sync-card-row .sync-card-info { flex:1; min-width:180px; }
+.sync-card-row .sync-card-info b { font-size:13px; opacity:0.9; display:block; }
+.sync-card-row .sync-card-info span { font-size:11px; opacity:0.8; }
+.sync-card-row button { background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.3); padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; font-family:inherit; }
+.sync-card-row button:hover { background:rgba(255,255,255,0.28); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============== Sidebar ============== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <div class="logo-dot">汗</div>
+        <div>
+          <div class="brand-name">workbuddy 工作台</div>
+          <div class="brand-sub">汗马电子 · LED车灯海外销售</div>
+        </div>
+      </div>
+    </div>
+    <div class="menu" id="menu">
+      <div class="subnav">主功能</div>
+      <div class="menu-item active" data-mod="plan"><span class="ico">📋</span><span>每日计划</span></div>
+      <div class="menu-item" data-mod="terms"><span class="ico">💡</span><span>LED后装术语</span></div>
+      <div class="menu-item" data-mod="cert"><span class="ico">✅</span><span>认证大全</span></div>
+      <div class="menu-item" data-mod="social"><span class="ico">🌐</span><span>社媒情报</span></div>
+      <div class="menu-item" data-mod="ielts"><span class="ico">🎓</span><span>雅思6.5计划</span></div>
+      <div class="menu-item" data-mod="bizeng"><span class="ico">📨</span><span>外贸商务英语</span></div>
+      <div class="menu-item" data-mod="customer"><span class="ico">🤝</span><span>客户开发</span></div>
+      <div class="menu-item" data-mod="data"><span class="ico">📊</span><span>数据复盘</span></div>
+      <div class="subnav">工具</div>
+      <div class="menu-item" data-mod="video"><span class="ico">🎥</span><span>每日拍视频</span></div>
+      <div class="menu-item" data-mod="memo"><span class="ico">📝</span><span>备忘录</span></div>
+    </div>
+    <div class="sidebar-foot">
+      <span>v2.0 · 已保存本地</span>
+      <span id="clock">--:--</span>
+    </div>
+  </aside>
+
+  <!-- ============== Main ============== -->
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs">
+        <span>工作台</span>
+        <span class="now" id="crumbNow">每日计划</span>
+      </div>
+      <div class="top-actions">
+        <div class="date-pill" id="datePill">📅 --</div>
+        <button class="btn-sync" onclick="if(typeof syncToday==='function')syncToday()">🔄 同步到手机</button>
+      </div>
+    </header>
+    <section class="content" id="content">
+      <!-- dynamic content -->
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===========================================================
+   MODULES DATA — 用户真实需求
+   =========================================================== */
+const MODULES = [
+  { id:'plan', icon:'📋', name:'每日计划', group:'主功能', sub:'今日必做 · 进度一目了然' },
+  { id:'terms', icon:'💡', name:'LED后装术语', group:'知识', sub:'英语 + 中文大白话' },
+  { id:'cert', icon:'✅', name:'认证大全', group:'知识', sub:'缩写 · 全称 · 大白话' },
+  { id:'social', icon:'🌐', name:'社媒情报', group:'获客', sub:'LinkedIn · FB · YouTube（澳新欧）' },
+  { id:'ielts', icon:'🎓', name:'雅思6.5计划', group:'学习', sub:'听/说/读/写每日打卡' },
+  { id:'bizeng', icon:'📨', name:'外贸商务英语', group:'学习', sub:'专业术语 + 邮件实战' },
+  { id:'customer', icon:'🤝', name:'客户开发', group:'获客', sub:'主动开发 · 跟进' },
+  { id:'data', icon:'📊', name:'数据复盘', group:'主功能', sub:'周报 · 业绩 · 节奏' },
+  { id:'video', icon:'🎥', name:'每日拍视频', group:'获客', sub:'拍摄 · 发布 · 积累短视频' },
+  { id:'memo', icon:'📝', name:'备忘录', group:'工具', sub:'临时记录' },
+];
+
+/* ---------- LED 后装市场术语 ---------- */
+const LED_TERMS = [
+  { t:'Aftermarket', p:'ˈɑːftəmɑːkɪt', cat:'市场', m:'后装市场', d:'新车出厂后，车主自己更换/升级的配件市场。我们做的大多数 LED 车灯都属于这个市场。' },
+  { t:'OEM', p:'oʊ iː ɛm', cat:'供应链', m:'原始设备制造商', d:'Original Equipment Manufacturer。给整车厂直接供货的厂家，比如给丰田原厂大灯的厂商。' },
+  { t:'ODM', p:'oʊ diː ɛm', cat:'供应链', m:'原始设计制造商', d:'Original Design Manufacturer。厂家自己设计好产品，客户贴牌卖。适合想打造自有品牌的买家。' },
+  { t:'OES', p:'oʊ iː ɛs', cat:'供应链', m:'原厂售后服务件', d:'Original Equipment Supplier。原厂配件售后渠道，品质接近 OEM，但价格更灵活。' },
+  { t:'Halogen', p:'ˈhælədʒən', cat:'光源', m:'卤素灯', d:'传统车灯，发黄光，便宜但亮度低、寿命短。LED 要替代的主要对象。' },
+  { t:'HID / Xenon', p:'ˈzaɪnɒn', cat:'光源', m:'氙气灯', d:'亮度高但启动慢、需要安定器。现在逐步被 LED 取代。' },
+  { t:'Lumens', p:'ˈluːmənz', cat:'光学', m:'流明', d:'亮度单位。数值越高灯越亮。后装 LED 大灯常见 4000-10000 流明/对。' },
+  { t:'Kelvin / K', p:'ˈkɛlvɪn', cat:'光学', m:'色温', d:'光的颜色。3000K 黄光，4300K 暖白，6000K 正白，8000K 以上偏蓝。' },
+  { t:'Beam Pattern', p:'biːm ˈpætən', cat:'光学', m:'光型', d:'灯光投射出来的形状。好的光型要有清晰的明暗截止线，不晃对面司机。' },
+  { t:'Cutoff Line', p:'ˈkʌtɒf laɪn', cat:'光学', m:'截止线', d:'近光灯明暗分界的那条线。左舵车和右舵车的截止线形状不同。' },
+  { t:'LHD / RHD', p:'ɛl eɪtʃ diː', cat:'市场', m:'左舵 / 右舵', d:'Left Hand Drive / Right Hand Drive。欧洲大陆、中国是 LHD；英国、澳大利亚、日本、印度是 RHD。卖灯前要确认车型。' },
+  { t:'Canbus', p:'ˈkænbʌs', cat:'电子', m:'车载总线/防报错', d:'汽车电子系统。LED 灯装上后如果仪表盘报故障码，就需要带 Canbus 解码功能的灯。' },
+  { t:'Decoder', p:'dɪˈkoʊdər', cat:'电子', m:'解码器', d:'外接一个电阻或电容，骗过车载电脑，让 LED 灯不报故障码。' },
+  { t:'CSP', p:'siː ɛs piː', cat:'灯珠', m:'芯片级封装', d:'Chip Scale Package。一种 LED 灯珠封装技术，体积小、亮度高，常用于后装大灯。' },
+  { t:'COB', p:'siː oʊ biː', cat:'灯珠', m:'板上芯片封装', d:'Chip On Board。早期 LED 常用，发光面大但散热一般，现在中高端多用 CSP/Flip chip。' },
+  { t:'Heat Sink', p:'hiːt sɪŋk', cat:'散热', m:'散热片', d:'把 LED 产生的热量导走的金属部件。散热好坏直接决定寿命。' },
+  { t:'Cooling Fan', p:'ˈkuːlɪŋ fæn', cat:'散热', m:'散热风扇', d:'主动散热。优点是散热效率高；缺点是噪音和潜在故障点。' },
+  { t:'Copper Braid', p:'ˈkɒpər breɪd', cat:'散热', m:'铜编织带', d:'柔性散热方案，可以弯折安装，常用于空间狭小的车型。' },
+  { t:'IP67 / IP68', p:'aɪ piː 67', cat:'防护', m:'防水防尘等级', d:'IP 后面两位数字，第一位防尘、第二位防水。67=短暂浸水，68=持续潜水。LED 大灯常见 IP67。' },
+  { t:'Plug and Play', p:'plʌg ənd pleɪ', cat:'安装', m:'即插即用', d:'不需要改线、不需要解码，直接替换原车灯泡。这是后装 LED 最大的卖点之一。' },
+  { t:'Bulb Base / Socket', p:'bʌlb beɪs', cat:'型号', m:'灯座型号', d:'H4、H7、H11、9005、9006、9012 等。不同车型原车灯座不同，必须匹配。' },
+  { t:'High Beam', p:'haɪ biːm', cat:'功能', m:'远光灯', d:'照明距离远，平时不能常开，会车要切换近光。' },
+  { t:'Low Beam', p:'loʊ biːm', cat:'功能', m:'近光灯', d:'日常主要使用的灯，有明暗截止线，不晃对面车。' },
+  { t:'Fog Light', p:'fɒg laɪt', cat:'功能', m:'雾灯', d:'雨雾天用，位置低、穿透力强，常见 H11、H8、881。' },
+  { t:'Turn Signal', p:'tɜːrn ˈsɪɡnəl', cat:'功能', m:'转向灯', d:'转弯/变道时闪烁的黄灯，LED 版需要加电阻防快闪。' },
+  { t:'Tail Light', p:'teɪl laɪt', cat:'功能', m:'尾灯', d:'刹车灯、示宽灯、倒车灯等车尾灯具。' },
+  { t:'Daytime Running Light', p:'deɪtaɪm ˈrʌnɪŋ laɪt', cat:'功能', m:'日间行车灯', d:'DRL。欧洲很多国家强制要求白天开灯，这个市场很大。' },
+  { t:'Strobe / Flash', p:'stroʊb', cat:'功能', m:'爆闪', d:'快速闪烁模式。某些买家喜欢，但很多国家道路法规禁止。' },
+  { t:'Lifespan', p:'ˈlaɪfspæn', cat:'性能', m:'使用寿命', d:'LED 灯常见标称 30000-50000 小时，实际受散热影响很大。' },
+  { t:'Warranty', p:'ˈwɔːrənti', cat:'商务', m:'质保期', d:'一般后装 LED 大灯质保 1-2 年。报价时要明确质保条款。' },
+];
+
+/* ---------- 认证大全 ---------- */
+const CERTS = [
+  { c:'CE', full:'Conformité Européenne', market:'欧洲', plain:'欧盟市场准入通行证。贴 CE 标表示产品符合欧盟安全/电磁兼容要求，是欧洲客户的基本要求。' },
+  { c:'E-Mark / ECE', full:'Economic Commission for Europe', market:'欧洲', plain:'欧洲经济委员会汽车认证。给车灯发“身份证”，证明光学、安全达标。E1=德国，E4=荷兰，E11=英国等。' },
+  { c:'RoHS', full:'Restriction of Hazardous Substances', market:'欧洲', plain:'限制铅、汞、镉等有害物质。出口欧盟电子产品必备，否则可能被海关扣货。' },
+  { c:'REACH', full:'Registration, Evaluation, Authorization and Restriction of Chemicals', market:'欧洲', plain:'欧盟化学品注册法规。关注 SVHC 高关注物质清单，部分 LED 材料需符合。' },
+  { c:'DOT', full:'Department of Transportation', market:'美国', plain:'美国交通部认证。在美国销售车灯需符合 DOT 标准，但 DOT 不是发证机构，主要是自我声明。' },
+  { c:'SAE', full:'Society of Automotive Engineers', market:'美国', plain:'美国汽车工程师学会标准。很多美国车灯测试参照 SAE 标准，如 SAE J1383。' },
+  { c:'FCC', full:'Federal Communications Commission', market:'美国', plain:'美国联邦通信委员会。带无线/蓝牙功能的车灯才需要，普通 LED 大灯一般不用。' },
+  { c:'IP67 / IP68', full:'Ingress Protection', market:'全球', plain:'防水防尘等级。67=防短时浸水，68=防持续潜水。后装 LED 大灯一般做到 IP67。' },
+  { c:'ISO 9001', full:'International Organization for Standardization', market:'全球', plain:'质量管理体系认证。证明工厂有规范的质量管理流程，大客户验厂前常看。' },
+  { c:'IATF 16949', full:'International Automotive Task Force', market:'全球', plain:'汽车行业质量管理体系。比 ISO 9001 更严格，做 OEM 车厂配套一般需要。' },
+  { c:'INMETRO', full:'Instituto Nacional de Metrologia, Qualidade e Tecnologia', market:'巴西', plain:'巴西国家计量质量技术研究院认证。LED 车灯进入巴西市场通常需要 INMETRO。' },
+  { c:'SONCAP', full:'Standards Organisation of Nigeria Conformity Assessment Programme', market:'尼日利亚', plain:'尼日利亚标准局合格评定。出口尼日利亚必须做的清关认证。' },
+  { c:'PVOC', full:'Pre-Export Verification of Conformity', market:'肯尼亚等东非', plain:'出口前符合性验证。肯尼亚、坦桑尼亚、乌干达等东非国家清关需要。' },
+  { c:'GCC', full:'Gulf Cooperation Council', market:'中东', plain:'海湾合作委员会认证。沙特、阿联酋、科威特等中东国家汽车配件准入认证。' },
+  { c:'SABER / SASO', full:'Saudi Standards, Metrology and Quality Organization', market:'沙特', plain:'沙特产品安全计划。出口沙特需通过 SABER 平台申请 PCOC+SCOC 证书。' },
+  { c:'CCC', full:'China Compulsory Certification', market:'中国', plain:'中国强制性产品认证。在中国国内销售的部分车灯需要，出口一般不需要。' },
+  { c:'E-mark ECE R10', full:'ECE Regulation 10', market:'欧洲', plain:'电磁兼容性法规。车灯带电子驱动，在欧洲卖常需要 R10 EMC 测试。' },
+  { c:'ECE R48', full:'ECE Regulation 48', market:'欧洲', plain:'关于车辆灯光安装认证。确保灯光在车上安装后符合法规。' },
+  { c:'UL', full:'Underwriters Laboratories', market:'北美', plain:'美国保险商实验室安全认证。部分电子配件会要求，LED 大灯较少强制。' },
+];
+
+/* ---------- 外贸商务英语 ---------- */
+const BIZ_ENG = [
+  { t:'PI', p:'piː aɪ', m:'Proforma Invoice · 形式发票', ex:'Please confirm the order so we can issue a <em>PI</em> for deposit payment.' },
+  { t:'CI', p:'siː aɪ', m:'Commercial Invoice · 商业发票', ex:'We will send you the <em>CI</em> and packing list before shipment.' },
+  { t:'PL', p:'piː ɛl', m:'Packing List · 装箱单', ex:'The <em>PL</em> shows 50 cartons, total gross weight 320kg.' },
+  { t:'BL / B/L', p:'biː ɛl', m:'Bill of Lading · 海运提单', ex:'Original <em>BL</em> will be sent to you after balance payment.' },
+  { t:'AWB', p:'eɪ dʌbljuː biː', m:'Air Waybill · 空运单', ex:'For samples, we usually send by DHL with <em>AWB</em> tracking.' },
+  { t:'CO', p:'siː oʊ', m:'Certificate of Origin · 原产地证', ex:'We can provide <em>CO</em> Form A or Form E for your customs.' },
+  { t:'MOQ', p:'ɛm oʊ kjuː', m:'Minimum Order Quantity · 最小起订量', ex:'Our <em>MOQ</em> is 500 sets per model for OEM packaging.' },
+  { t:'Lead Time', p:'liːd taɪm', m:'生产/交货周期', ex:'<em>Lead time</em> is 25-30 days after receiving 30% deposit.' },
+  { t:'Deposit', p:'dɪˈpɒzɪt', m:'定金', ex:'We require 30% <em>deposit</em> and 70% balance before shipment.' },
+  { t:'Balance', p:'ˈbæləns', m:'尾款', ex:'Please arrange the <em>balance</em> payment so we can ship tomorrow.' },
+  { t:'T/T', p:'tiː tiː', m:'Telegraphic Transfer · 电汇', ex:'We accept payment by <em>T/T</em> to our company account.' },
+  { t:'L/C', p:'ɛl siː', m:'Letter of Credit · 信用证', ex:'For large orders, we can accept <em>L/C at sight</em>.' },
+  { t:'FOB', p:'ɛf oʊ biː', m:'Free On Board · 装运港船上交货', ex:'Price is <em>FOB Shenzhen</em>, sea freight on your side.' },
+  { t:'CIF', p:'siː aɪ ɛf', m:'Cost, Insurance and Freight · 到岸价', ex:'We can quote <em>CIF Sydney</em> including freight and insurance.' },
+  { t:'EXW', p:'iː ɛks dʌbljuː', m:'Ex Works · 工厂交货', ex:'<em>EXW</em> price means you arrange pickup from our factory.' },
+  { t:'FCL / LCL', p:'ɛf siː ɛl', m:'整柜 / 拼箱', ex:'If quantity reaches 20CBM, we suggest <em>FCL</em> instead of <em>LCL</em>.' },
+  { t:'CBM', p:'siː biː ɛm', m:'Cubic Meter · 立方米', ex:'Carton size is 0.08 CBM, so one 20GP fits about 350 cartons.' },
+  { t:'HS Code', p:'eɪtʃ ɛs koʊd', m:'海关编码', ex:'The <em>HS code</em> for LED headlight is usually 8512.20 or 8512.40.' },
+  { t:'Customs Clearance', p:'ˈkʌstəmz ˈklɪərəns', m:'清关', ex:'We will provide all documents for your <em>customs clearance</em>.' },
+  { t:'Incoterms', p:'ˈɪŋkoʊtɜːrmz', m:'国际贸易术语解释通则', ex:'Please confirm which <em>Incoterms 2020</em> you prefer.' },
+  { t:'OEM / ODM', p:'oʊ iː ɛm', m:'贴牌 / 设计代工', ex:'We accept both <em>OEM</em> and <em>ODM</em> orders.' },
+  { t:'Sample Order', p:'ˈsæmpəl ˈɔːrdər', m:'样品单', ex:'Many clients start with a <em>sample order</em> before bulk purchase.' },
+  { t:'Bulk Order', p:'bʌlk ˈɔːrdər', m:'大货订单', ex:'After sample approval, we can discuss <em>bulk order</em> pricing.' },
+  { t:'ETA / ETD', p:'iː tiː eɪ', m:'预计到港 / 预计开船', ex:'<em>ETD</em> Shenzhen Aug 15, <em>ETA</em> Melbourne Sep 05.' },
+];
+
+/* ---------- LED 术语场景 + 对话 ---------- */
+const TERM_SCENES = {
+  'Aftermarket': { emoji:'🚗\u2192🏪\u2192🔧\u2192💡', desc:'车主买了新车 \u2192 去汽配店 \u2192 师傅拆旧灯 \u2192 装上我们的LED',
+    dlgEn:'Customer: Are these original factory lights?\nYou: No, these are aftermarket LED headlights. Brighter than OEM, and much better value.',
+    dlgCn:'客户：这是原厂灯吗？\n你：不是，这是后装LED大灯。比原厂的亮，性价比也高得多。' },
+  'OEM': { emoji:'🏭\u2192🚙\u2192📦', desc:'整车厂 \u2192 直接装到新车上 \u2192 出厂',
+    dlgEn:'Customer: Do you supply to car factories?\nYou: We focus on aftermarket, but our quality meets OEM standards.',
+    dlgCn:'客户：你们给车厂供货吗？\n你：我们主做后装市场，但品质达到OEM标准。' },
+  'ODM': { emoji:'💡\u2192🏷️\u2192📦', desc:'我们设计好产品 \u2192 贴客户的牌子 \u2192 出货',
+    dlgEn:'Customer: Can you put our brand on the lights?\nYou: Yes, we offer ODM service. We design, you brand it.',
+    dlgCn:'客户：能印我们的牌子吗？\n你：可以，我们提供ODM服务。我们设计，你贴牌。' },
+  'Halogen': { emoji:'💡\u2192🟡\u2192🗑️', desc:'老款卤素灯 \u2192 发黄光 \u2192 寿命短要换掉',
+    dlgEn:'Customer: Why should I switch from halogen?\nYou: LED is 3x brighter, lasts 10x longer, and uses less power.',
+    dlgCn:'客户：为什么要从卤素灯换LED？\n你：LED亮度是3倍，寿命是10倍，还更省电。' },
+  'Lumens': { emoji:'💡\u2192📊\u2192🔢', desc:'灯亮不亮 \u2192 看流明数值 \u2192 数字越大越亮',
+    dlgEn:'Customer: How bright are these lights?\nYou: 8000 lumens per pair. That is about 3 times brighter than stock halogen.',
+    dlgCn:'客户：这灯有多亮？\n你：一对8000流明。大概比原厂卤素灯亮3倍。' },
+  'Kelvin / K': { emoji:'🟡30K\u2192⚪60K\u2192🔵80K', desc:'3000K黄光 \u2192 6000K正白 \u2192 8000K偏蓝',
+    dlgEn:'Customer: What color temperature do you recommend?\nYou: 6000K is pure white, most popular. 4300K is warmer for rain.',
+    dlgCn:'客户：推荐什么色温？\n你：6000K正白光，最受欢迎。4300K偏暖，雨天穿透更好。' },
+  'Beam Pattern': { emoji:'💡\u2192📐\u2192🚗', desc:'灯发出来 \u2192 投出特定形状 \u2192 照路面不晃人',
+    dlgEn:'Customer: Will these blind oncoming traffic?\nYou: No, our beam pattern has a clean cutoff line. It lights up the road, not other drivers.',
+    dlgCn:'客户：会不会晃对面来车？\n你：不会，我们的光型有清晰截止线。只照路面，不晃人。' },
+  'Cutoff Line': { emoji:'💡\u2192✂️\u2192↗️↘️', desc:'灯光上面暗下面亮 \u2192 像被刀切了一刀 \u2192 不晃对面司机',
+    dlgEn:'Customer: What is a cutoff line?\nYou: It is the sharp line between light and dark. Above it is dark, below is bright. It protects oncoming drivers.',
+    dlgCn:'客户：什么是截止线？\n你：就是灯光上面暗下面亮的那条分界线。上面暗不晃人，下面亮照路面。' },
+  'LHD / RHD': { emoji:'🇨🇳⬅️ | ➡️🇬🇧🇦🇺', desc:'中国欧洲左舵靠右走 | 英国澳洲右舵靠左走',
+    dlgEn:'Customer: I am in Australia. Do you have RHD lights?\nYou: Yes, we have both LHD and RHD versions. Australia needs RHD beam pattern.',
+    dlgCn:'客户：我在澳大利亚，有右舵灯吗？\n你：有的，左舵右舵都有。澳洲需要右舵光型。' },
+  'Canbus': { emoji:'🚗💻⚠️\u2192🔧✅', desc:'车电脑检测到LED \u2192 仪表盘报错 \u2192 加Canbus解码就不报了',
+    dlgEn:'Customer: Will these trigger a dashboard warning?\nYou: If your car has Canbus, you need our Canbus-ready version. It has a built-in decoder.',
+    dlgCn:'客户：装上会不会仪表盘报警？\n你：如果你的车有Canbus系统，要选Canbus版。内置解码器，不报错。' },
+  'CSP': { emoji:'🔍\u2192📱\u2192💡', desc:'芯片很小 \u2192 像手机芯片一样精密 \u2192 亮度高散热好',
+    dlgEn:'Customer: What chip do your lights use?\nYou: We use CSP chips. Smaller, brighter, and better heat dissipation than old COB chips.',
+    dlgCn:'客户：你们灯用什么芯片？\n你：CSP芯片。比老款COB更小、更亮、散热更好。' },
+  'IP67 / IP68': { emoji:'💧\u2192💡\u2192✅', desc:'泡水里 \u2192 灯不进水 \u2192 照常亮',
+    dlgEn:'Customer: Can these handle heavy rain?\nYou: Yes, IP67 rated. That means they can be submerged in water briefly with no problem.',
+    dlgCn:'客户：大雨天能用吗？\n你：可以的，IP67级防水。短时间泡水里都没问题。' },
+  'Plug and Play': { emoji:'❌🔧 ➡️ ✅🔌', desc:'不用改线 \u2192 不用解码 \u2192 直接插上就能用',
+    dlgEn:'Customer: Do I need to modify my wiring?\nYou: No, it is plug and play. Just take out the old bulb and plug in the LED. Done in 5 minutes.',
+    dlgCn:'客户：需要改线路吗？\n你：不需要，即插即用。拔掉旧灯泡，插上LED就行，5分钟搞定。' },
+  'Bulb Base / Socket': { emoji:'🔍\u2192H4/H7/H11', desc:'看原车灯座型号 \u2192 对应买H4或H7 \u2192 插上才能用',
+    dlgEn:'Customer: How do I know which model to buy?\nYou: Check your original bulb. Common types are H4, H7, H11, 9005, 9006. Match it and you are good.',
+    dlgCn:'客户：怎么知道买哪个型号？\n你：看一下你原车灯泡。常见H4、H7、H11、9005、9006。对上型号就行。' },
+  'Warranty': { emoji:'📅\u2192🔧\u2192🆓', desc:'买灯那天开始算 \u2192 期内坏了 \u2192 免费换新',
+    dlgEn:'Customer: What is the warranty?\nYou: 2 years. If any light fails within 2 years, we send you a free replacement.',
+    dlgCn:'客户：质保多久？\n你：两年。两年内有问题，我们免费换新。' },
+};
+function termScene(t){ return TERM_SCENES[t] || {emoji:'💡📋', desc:'LED车灯专业术语，结合产品理解更深入。', dlgEn:'Customer: Can you explain this term?\nYou: Sure, let me break it down in simple words for you.', dlgCn:'客户：能解释一下这个术语吗？\n你：当然，我用大白话给您讲。'}; }
+
+/* ---------- 商务英语场景 + 大白话 + 对话 ---------- */
+const BIZ_SCENES = {
+  'PI': { emoji:'📄\u2192✍️\u2192💰', desc:'客户确认要买 \u2192 你出一份形式发票 \u2192 客户凭这个付定金',
+    plain:'就是一份"预发票"，告诉客户买什么、多少钱、怎么付款。客户确认了就凭这个打定金。',
+    dlgEn:'You: Please confirm the PI so we can start production.\nCustomer: I confirmed. I will arrange 30% deposit today.',
+    dlgCn:'你：请确认形式发票，我们好开始生产。\n客户：确认了，今天安排30%定金。' },
+  'MOQ': { emoji:'📦\u2192🔢\u2192✅', desc:'你要买 \u2192 最少买这么多 \u2192 才接单',
+    plain:'就是"最少买多少"。比如MOQ 100套，你买99套我不卖，买100套起步才行。',
+    dlgEn:'Customer: Can I order 50 sets?\nYou: I am sorry, our MOQ is 100 sets. But I can offer a better price for 200.',
+    dlgCn:'客户：能买50套吗？\n你：抱歉，最少100套起。不过200套我可以给更好的价格。' },
+  'Lead Time': { emoji:'📅\u2192🏭\u2192🚢', desc:'下单那天 \u2192 工厂生产 \u2192 发货要多久',
+    plain:'就是"从下单到发货要多少天"。这个一定要提前说清楚，不然客户等急了会催。',
+    dlgEn:'Customer: How long is the lead time?\nYou: 15-20 days after receiving deposit. I will keep you updated.',
+    dlgCn:'客户：交货周期多久？\n你：收到定金后15-20天。我会随时跟您同步进度。' },
+  'FOB': { emoji:'🏭\u2192🚢\u2192🌊', desc:'工厂出货 \u2192 送到装运港船上 \u2192 之后运费你出',
+    plain:'就是"送到船上为止"。从工厂到港口的运费我出，上了船之后的运费你出。',
+    dlgEn:'Customer: Is this FOB price?\nYou: Yes, FOB Shenzhen. Sea freight to your port is on your side.',
+    dlgCn:'客户：这是FOB价吗？\n你：是的，FOB深圳。到你们港口的海运费你们出。' },
+  'CIF': { emoji:'🏭\u2192🚢\u2192🇧🇷', desc:'工厂出货 \u2192 运到你港口 \u2192 含保险含运费',
+    plain:'就是"送到你港口为止"。运费和保险费我帮你出，你到了港口清关提货就行。',
+    dlgEn:'Customer: Can you quote CIF?\nYou: Sure, we can quote CIF Santos. That includes freight and insurance to your port.',
+    dlgCn:'客户：能报CIF吗？\n你：可以，我们报CIF桑托斯。含运费和保险到你港口。' },
+  'Deposit': { emoji:'💰30%\u2192🏭', desc:'先付30%定金 \u2192 工厂才开始做',
+    plain:'就是"先付一部分钱"。外贸常见30%定金，付了工厂才开工。不付定金不排产。',
+    dlgEn:'You: We require 30% deposit to start production.\nCustomer: Understood. I will wire the deposit this week.',
+    dlgCn:'你：我们需要30%定金才能开始生产。\n客户：明白了，这周就汇款。' },
+  'Balance': { emoji:'💰70%\u2192🚢', desc:'货做好了 \u2192 付清尾款 \u2192 才发货',
+    plain:'就是"尾款"。货做好了对方要付清剩下的钱，付了我们才发货。不付尾款不发货。',
+    dlgEn:'You: Goods are ready. Please arrange the 70% balance so we can ship.\nCustomer: Payment sent today. Please ship ASAP.',
+    dlgCn:'你：货好了，请安排70%尾款我们好发货。\n客户：今天已付款，请尽快发货。' },
+  'T/T': { emoji:'🏦\u2192💸\u2192🏭', desc:'去银行 \u2192 电汇到我公司账户 \u2192 到账快',
+    plain:'就是"银行转账"。最常用的付款方式，直接从你银行打到我银行，一般3-5天到账。',
+    dlgEn:'Customer: How do I pay?\nYou: By T/T to our company bank account. 30% deposit, 70% before shipment.',
+    dlgCn:'客户：怎么付款？\n你：电汇到我们公司账户。30%定金，发货前付70%尾款。' },
+  'BL / B/L': { emoji:'📄\u2192🚢\u2192📦', desc:'船公司给的提单 \u2192 证明货上了船 \u2192 凭这个提货',
+    plain:'就是"海运提单"。船公司发的一张纸，证明你的货上了船。没有这个客户提不到货。',
+    dlgEn:'You: We will send the original B/L by DHL after balance payment.\nCustomer: Good, I need it for customs clearance.',
+    dlgCn:'你：收到尾款后我们用DHL寄正本提单。\n客户：好的，我清关要用。' },
+  'Sample Order': { emoji:'📦\u2192✈️\u2192✅', desc:'先买几个样品 \u2192 空运过去试 \u2192 好了再下大单',
+    plain:'就是"先买几个试试"。客户第一次合作不放心，先买几个样品看看质量，好了再下大单。',
+    dlgEn:'Customer: Can I get samples first?\nYou: Of course! We can send 2 sets by DHL. You test first, then decide on bulk order.',
+    dlgCn:'客户：能先要样品吗？\n你：当然！我们可以DHL发2套。您先测试，满意了再下大单。' },
+  'HS Code': { emoji:'🔢\u2192📋\u2192🏛️', desc:'一串数字编码 \u2192 海关看这个 \u2192 决定收多少税',
+    plain:'就是"海关编码"。每种商品有一个编号，海关看这个编号决定收多少关税。LED车灯一般是8512开头。',
+    dlgEn:'Customer: What is the HS code?\nYou: 8512.20.00 for LED headlights. You can check the import duty rate with this code.',
+    dlgCn:'客户：海关编码是多少？\n你：LED大灯是8512.20.00。用这个编码可以查进口关税。' },
+};
+function bizScene(t){ return BIZ_SCENES[t] || {emoji:'📋\u2192✉️\u2192✅', desc:'外贸商务英语，结合实际邮件和对话理解。', plain:'外贸常用术语，和客户沟通时一定会用到。', dlgEn:'Customer: Can you explain this?\nYou: Sure, let me walk you through it.', dlgCn:'客户：能解释一下吗？\n你：当然，我给您讲清楚。'}; }
+
+/* ---------- 雅思核心词汇 ---------- */
+const IELTS_VOCAB = [
+  { t:'Advantage', p:'ədˈvæntɪdʒ', m:'优势、优点', d:'比别的东西好的地方。比如LED比卤素灯的优势是更亮更省电。',
+    emoji:'💡>💡', scene:'两个灯对比 \u2192 LED更亮 \u2192 这就是优势',
+    dlgEn:'The main advantage of LED headlights is their brightness and energy efficiency.',
+    dlgCn:'LED大灯的主要优势是亮度和节能。' },
+  { t:'Significant', p:'sɪɡˈnɪfɪkənt', m:'显著的、重要的', d:'不是一点点，是很大的变化或差别。比如LED寿命比卤素灯显著更长。',
+    emoji:'📈↑↑', scene:'数据图表 \u2192 曲线大幅上升 \u2192 显著增长',
+    dlgEn:'There has been a significant increase in LED headlight sales this year.',
+    dlgCn:'今年LED大灯的销量有了显著增长。' },
+  { t:'Efficient', p:'ɪˈfɪʃnt', m:'高效的', d:'用少的力气做多的事。LED比卤素灯高效，因为它用电少但更亮。',
+    emoji:'⚡\u2192💡', scene:'少量电 \u2192 产出很亮的光 \u2192 高效',
+    dlgEn:'LED lights are more efficient than halogen bulbs, using less power for more light.',
+    dlgCn:'LED灯比卤素灯高效，用更少的电发出更多的光。' },
+  { t:'Compete', p:'kəmˈpiːt', m:'竞争', d:'和别人抢同一个市场或客户。我们的LED灯和别的厂家竞争，靠的是品质和价格。',
+    emoji:'🏁\u2192💡vs💡', scene:'两家灯厂 \u2192 抢同一个客户 \u2192 竞争',
+    dlgEn:'We compete on quality and price, not just low cost.',
+    dlgCn:'我们靠品质和价格竞争，不是只靠低价。' },
+  { t:'Durable', p:'ˈdjʊərəbl', m:'耐用的', d:'不容易坏，用得久。LED灯比卤素灯耐用得多，可以用几万小时。',
+    emoji:'💪\u2192💡', scene:'灯一直亮 \u2192 好几年不坏 \u2192 耐用',
+    dlgEn:'LED headlights are very durable, often lasting over 30,000 hours.',
+    dlgCn:'LED大灯非常耐用，通常能用3万小时以上。' },
+  { t:'Innovative', p:'ˈɪnəvətɪv', m:'创新的', d:'以前没人做过的新东西。CSP芯片就是一种创新技术。',
+    emoji:'💡\u2192🆕', scene:'老技术 \u2192 突然出现新技术 \u2192 创新',
+    dlgEn:'Our company uses innovative CSP chip technology for better performance.',
+    dlgCn:'我们公司使用创新的CSP芯片技术，性能更好。' },
+  { t:'Negotiate', p:'nɪˈɡoʊʃieɪt', m:'谈判、商量', d:'你出价我还价，最后谈成一个双方都接受的价格。',
+    emoji:'🤝\u2192💰', scene:'你报100 \u2192 客户说80 \u2192 谈到90成交',
+    dlgEn:'We can negotiate the price if your order quantity is large enough.',
+    dlgCn:'如果订单量够大，价格可以商量。' },
+  { t:'Regulate', p:'ˈreɡjuleɪt', m:'监管、规定', d:'政府定的规矩。比如欧洲法规规定车灯必须有E-Mark认证。',
+    emoji:'🏛️\u2192📋\u2192✅', scene:'政府发文 \u2192 定了标准 \u2192 大家都要遵守',
+    dlgEn:'The European market is strictly regulated for automotive lighting.',
+    dlgCn:'欧洲市场对汽车照明有严格的法规监管。' },
+  { t:'Substitute', p:'ˈsʌbstɪtʃuːt', m:'替代品', d:'A代替B。LED灯是卤素灯的替代品。',
+    emoji:'💡\u2192🔄\u2192💡', scene:'卤素灯被拿掉 \u2192 换上LED \u2192 替代',
+    dlgEn:'LED lights are the best substitute for traditional halogen bulbs.',
+    dlgCn:'LED灯是传统卤素灯的最佳替代品。' },
+  { t:'Standard', p:'ˈstændərd', m:'标准', d:'大家都遵守的规矩。比如IP67就是一个防水标准。',
+    emoji:'📐\u2192✅', scene:'一把尺子量 \u2192 达到刻度 \u2192 符合标准',
+    dlgEn:'Our products meet international quality standards including CE and RoHS.',
+    dlgCn:'我们的产品符合CE和RoHS等国际质量标准。' },
+  { t:'Procedure', p:'prəˈsiːdʒər', m:'流程、步骤', d:'做一件事的先后顺序。比如出口流程：接单\u2192生产\u2192验货\u2192发货。',
+    emoji:'1️⃣\u21922️⃣\u21923️⃣', scene:'第一步接单 \u2192 第二步生产 \u2192 第三步发货',
+    dlgEn:'The export procedure includes order confirmation, production, inspection, and shipping.',
+    dlgCn:'出口流程包括确认订单、生产、验货和发货。' },
+  { t:'Requirement', p:'rɪˈkwaɪərmənt', m:'要求、必要条件', d:'客户必须要满足的条件。比如客户要求IP67防水。',
+    emoji:'📋\u2192✅\u2192✓', scene:'客户列出要求 \u2192 我们对照检查 \u2192 全部满足',
+    dlgEn:'IP67 waterproof is a mandatory requirement for this order.',
+    dlgCn:'IP67防水是这笔订单的强制要求。' },
+  { t:'Compromise', p:'ˈkɒmprəmaɪz', m:'妥协、折中', d:'各退一步。你报100客户给80，最后90成交就是妥协。',
+    emoji:'100\u219290\u219280', scene:'你报100 \u2192 客户给80 \u2192 折中到90',
+    dlgEn:'Both sides need to compromise to reach a deal.',
+    dlgCn:'双方都需要妥协才能达成交易。' },
+  { t:'Evaluate', p:'ɪˈvæljueɪt', m:'评估、评价', d:'仔细看看好不好，值不值。客户收到样品后会评估质量。',
+    emoji:'🔍\u2192📋\u2192⭐', scene:'拿放大镜看产品 \u2192 打分 \u2192 评估好坏',
+    dlgEn:'We need to evaluate the sample quality before placing a bulk order.',
+    dlgCn:'我们需要先评估样品质量，再下大货订单。' },
+  { t:'Trend', p:'trend', m:'趋势、潮流', d:'大家都在往哪个方向走。LED替代卤素就是行业趋势。',
+    emoji:'📊\u2192📈', scene:'数据图表 \u2192 LED销量往上走 \u2192 这就是趋势',
+    dlgEn:'The trend in automotive lighting is clearly shifting towards LED technology.',
+    dlgCn:'汽车照明的趋势明显在向LED技术转变。' },
+];
+
+/* ---------- 雅思常考口语对话 ---------- */
+const IELTS_DIALOGUES = [
+  { topic:'Part 1: Introduce yourself', emoji:'🙋',
+    en:'Examiner: Can you introduce yourself?\nYou: Sure. My name is [Name]. I work as a sales specialist at an LED car light export company. I mainly handle the European and South American markets. I am also preparing for the IELTS exam because I want to communicate better with my international clients.',
+    cn:'考官：能介绍一下你自己吗？\n你：好的，我叫[名字]。我在一家LED车灯出口公司做销售，主要负责欧洲和南美市场。我正在准备雅思考试，因为我想更好地和国际客户沟通。' },
+  { topic:'Part 1: Describe your job', emoji:'💼',
+    en:'Examiner: What do you do in your job?\nYou: I sell LED headlights to overseas buyers. My daily work includes replying to inquiries, sending quotations, following up with customers, and learning about international certifications like CE and E-Mark. I also make short videos to share my learning journey on social media.',
+    cn:'考官：你的工作内容是什么？\n你：我把LED大灯卖给海外买家。日常工作包括回复询盘、报价、跟进客户，以及学习CE和E-Mark等国际认证。我还拍短视频在社交媒体上分享我的学习过程。' },
+  { topic:'Part 2: Describe a product you know well', emoji:'💡',
+    en:'Examiner: Describe a product you know well.\nYou: I would like to talk about LED headlights that our company exports. They are much brighter than traditional halogen bulbs, using about 8000 lumens per pair. They are plug and play, meaning customers can install them without modifying their wiring. They also have a Canbus decoder built in, so they will not trigger dashboard warnings. I think this product is significant because it represents the future trend of automotive lighting — more efficient, more durable, and more environmentally friendly.',
+    cn:'考官：描述一个你熟悉的产品。\n你：我想谈谈我们公司出口的LED大灯。它们比传统卤素灯亮得多，一对大约8000流明。它们是即插即用的，客户不用改线路就能安装。它们还内置了Canbus解码器，不会触发仪表盘报警。我觉得这个产品很重要，因为它代表了汽车照明的未来趋势——更高效、更耐用、更环保。' },
+  { topic:'Part 2: Describe a challenge you faced', emoji:'⛰️',
+    en:'Examiner: Describe a challenge you faced and how you overcame it.\nYou: When I first started in foreign trade, my English was not good enough to negotiate with international clients. I often could not understand their technical questions about certifications and specifications. I decided to study IELTS and learn industry-specific vocabulary. Every day I practiced speaking for 15 minutes and memorized 20 new words. After 3 months, I could handle customer calls confidently and even closed a deal with a German client.',
+    cn:'考官：描述你面临的一个挑战以及你是如何克服的。\n你：我刚开始做外贸时，英语不够好，无法和国际客户谈判。我经常听不懂他们关于认证和规格的技术问题。我决定学雅思，学习行业专业词汇。每天练口语15分钟，背20个新单词。3个月后，我能自信地接客户电话，甚至和德国客户谈成了一笔订单。' },
+  { topic:'Part 2: Describe a skill you want to learn', emoji:'🎯',
+    en:'Examiner: Describe a skill you want to learn.\nYou: I want to improve my public speaking and presentation skills in English. As a foreign trade salesperson, I sometimes need to present our products to overseas buyers through video calls. Right now, I feel nervous when speaking English in front of people. I plan to practice by making short videos about LED car lights and posting them online. This way, I can improve both my English and my confidence at the same time.',
+    cn:'考官：描述一个你想学的技能。\n你：我想提高英语演讲和展示能力。作为外贸销售，我有时需要通过视频通话向海外买家展示产品。现在我在人前说英语会很紧张。我计划通过拍LED车灯的短视频并发布到网上来练习。这样我就能同时提高英语和自信心。' },
+  { topic:'Part 3: Discussion about trends', emoji:'📊',
+    en:'Examiner: What trends do you see in your industry?\nYou: The most significant trend is the shift from halogen to LED lighting. LED lights are more efficient, durable, and environmentally friendly. Another trend is the growing demand for Canbus-ready products, as modern cars have smarter computer systems. I think this trend will continue because consumers want better visibility and governments are regulating energy efficiency more strictly.',
+    cn:'考官：你看到你的行业有什么趋势？\n你：最显著的趋势是从卤素灯转向LED灯。LED更高效、耐用、环保。另一个趋势是对Canbus产品的需求增长，因为现代汽车的电脑系统更智能。我认为这个趋势会持续，因为消费者想要更好的视野，政府也在更严格地监管能效。' },
+];
+
+/* ===========================================================
+   STATE
+   =========================================================== */
+const TODAY = new Date().toISOString().slice(0,10);
+let state = loadState();
+function loadState() {
+  try {
+    const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem('hanma-workbuddy-v2') : null;
+    if (raw) return JSON.parse(raw);
+  } catch(e){ console.warn('localStorage unavailable', e); }
+  return {
+    currentModule: 'plan',
+    checkins: {},
+    tasksDone: {},
+    notes: {},
+    vocabIdx: 0,
+    ieltsProgress: {},
+    termIdx: 0,
+    certIdx: 0,
+    bizIdx: 0,
+    scriptDay: ((new Date().getDay() + 6) % 7), // 周一=0
+    videos: {},
+    lastExportAt: null,  // 最近一次导出/同步时间
+  };
+}
+function saveState() {
+  try { if (typeof localStorage !== 'undefined') localStorage.setItem('hanma-workbuddy-v2', JSON.stringify(state)); }
+  catch(e){ console.warn('save failed', e); }
+  scheduleCloudPush();
+}
+function todayKey(modId){ return `${modId}:${TODAY}`; }
+
+/* ===========================================================
+   MENU
+   =========================================================== */
+function renderMenu(){
+  const menu = document.getElementById('menu');
+  const groups = {};
+  MODULES.forEach(m => { groups[m.group] = groups[m.group] || []; groups[m.group].push(m); });
+  let html = '';
+  for (const g in groups) {
+    html += `<div class="subnav">${g}</div>`;
+    groups[g].forEach(m => {
+      html += `
+        <div class="menu-item ${m.id===state.currentModule?'active':''}" data-mod="${m.id}" role="button" tabindex="0">
+          <span class="ico">${m.icon}</span>
+          <span>${m.name}</span>
+          ${m.id===state.currentModule?'<span class="badge">当前</span>':''}
+        </div>`;
+    });
+  }
+  menu.innerHTML = html;
+  menu.querySelectorAll('.menu-item').forEach(el => {
+    el.onclick = () => switchModule(el.dataset.mod);
+  });
+}
+function switchModule(id){
+  state.currentModule = id;
+  saveState();
+  renderAll();
+}
+
+/* ===========================================================
+   TOPBAR & HELPERS
+   =========================================================== */
+function renderTopBar(){
+  const now = new Date();
+  const wk = ['日','一','二','三','四','五','六'][now.getDay()];
+  const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 周${wk}`;
+  const dp = document.getElementById('datePill'); if(dp) dp.textContent = '📅 ' + dateStr;
+  const cr = document.getElementById('crumbNow'); if(cr) cr.textContent = MODULES.find(m=>m.id===state.currentModule).name;
+  const cl = document.getElementById('clock'); if(cl) cl.textContent = now.toTimeString().slice(0,5);
+}
+function calcStreak(){
+  let s = 0; let d = new Date();
+  while (true) {
+    const k = d.toISOString().slice(0,10);
+    if (state.checkins[k]) { s++; d.setDate(d.getDate()-1); } else break;
+  }
+  return s;
+}
+function countLast7(){
+  let sum = 0;
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    sum += state.checkins[d.toISOString().slice(0,10)] || 0;
+  }
+  return sum;
+}
+function countTotal(){
+  return Object.values(state.checkins).reduce((a,b)=>a+b,0);
+}
+
+/* ===========================================================
+   CONTENT ROUTER
+   =========================================================== */
+function renderContent(){
+  const mod = MODULES.find(m => m.id === state.currentModule);
+  const el = document.getElementById('content');
+  switch(mod.id){
+    case 'plan': el.innerHTML = pagePlan(mod); break;
+    case 'terms': el.innerHTML = pageTerms(mod); break;
+    case 'cert': el.innerHTML = pageCert(mod); break;
+    case 'social': el.innerHTML = pageSocial(mod); break;
+    case 'ielts': el.innerHTML = pageIELTS(mod); break;
+    case 'bizeng': el.innerHTML = pageBizEng(mod); break;
+    case 'customer': el.innerHTML = pageCustomer(mod); break;
+    case 'data': el.innerHTML = pageData(mod); break;
+    case 'video': el.innerHTML = pageVideo(mod); break;
+    case 'memo': el.innerHTML = pageMemo(mod); break;
+    default: el.innerHTML = pagePlan(mod);
+  }
+  attachEvents();
+}
+
+function pageHeader(mod){
+  return `
+    <div class="page-head">
+      <div>
+        <div class="page-title">${mod.icon} ${mod.name}</div>
+        <div class="page-sub">${mod.sub} · ${TODAY}</div>
+      </div>
+      <div class="greet">🌿 每天进步一点点，年复一年的结果就是专业</div>
+    </div>`;
+}
+
+/* ---------- Plan page ---------- */
+function pagePlan(mod){
+  const done = state.checkins[TODAY] || 0;
+  const totalDays = Object.keys(state.checkins).length;
+  const streak = calcStreak();
+  const week = countLast7();
+  return pageHeader(mod) + `
+    ${syncStatusCard()}
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">连续打卡</div><div class="num">${streak}<span>天</span></div><div class="trend">坚持出奇迹 🔥</div></div>
+      <div class="card"><div class="lbl">累计打卡天数</div><div class="num">${totalDays}<span>天</span></div><div class="trend">用时间堆出信任</div></div>
+      <div class="card"><div class="lbl">今日完成项</div><div class="num">${done}<span>项</span></div><div class="trend">继续加油 ✨</div></div>
+      <div class="card"><div class="lbl">近7日完成</div><div class="num">${week}<span>项</span></div><div class="trend">稳定输出</div></div>
+    </div>
+    ${heatmapHTML()}
+    ${planTaskCard(mod.id, [
+      {t:'LED后装术语：学习并打卡 3 个新术语',k:'terms'},
+      {t:'认证大全：熟记 2 个认证的大白话含义',k:'cert'},
+      {t:'社媒情报：LinkedIn / FB / YouTube 刷澳新欧 15 分钟',k:'social'},
+      {t:'每日拍视频：拍摄并发布到社交媒体平台',k:'video'},
+      {t:'雅思 6.5：完成今日听说读写计划',k:'ielts'},
+      {t:'商务英语：学习 2 个外贸术语/邮件句型',k:'bizeng'},
+      {t:'客户开发：主动开发 3 个澳新欧客户或同行',k:'customer'},
+      {t:'数据复盘：记录今日询盘/报价/成单',k:'data'},
+    ])}
+    ${notesCard(mod.id)}
+  `;
+}
+
+function planTaskCard(modId, items){
+  const k = todayKey(modId);
+  const doneMap = state.tasksDone[k] || {};
+  let done = 0;
+  let html = '<div class="tasks-card"><div class="tasks-head"><div><div class="tasks-title">✅ 今日打卡清单</div><div style="font-size:11px;color:#8b8579;margin-top:4px;">勾一项，进步一项</div></div><div style="display:flex;align-items:center;"><div class="progress-bar"><div class="progress-fill" id="planFill"></div></div><span class="progress-text" id="planText">0%</span></div></div><ul class="task-list">';
+  items.forEach((it,i) => {
+    const checked = doneMap[i] ? 'checked' : '';
+    if (doneMap[i]) done++;
+    html += `
+      <li class="task ${doneMap[i]?'done':''}" data-idx="${i}" data-jump="${it.k||''}">
+        <input type="checkbox" ${checked}/>
+        <span class="task-text">${it.t}</span>
+      </li>`;
+  });
+  html += '</ul></div>';
+  // update progress after insert
+  setTimeout(() => {
+    const pct = items.length ? Math.round(done/items.length*100) : 0;
+    const f = document.getElementById('planFill'); const t = document.getElementById('planText');
+    if(f) f.style.width = pct+'%'; if(t) t.textContent = pct+'%';
+  }, 0);
+  return html;
+}
+
+function heatmapHTML(){
+  const days = [];
+  for(let i=89;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  let cells = '';
+  days.forEach(d => {
+    const v = state.checkins[d] || 0;
+    const lvl = v>0 ? Math.min(4, Math.ceil(v/3)) : 0;
+    cells += `<div class="heat-cell ${d===TODAY?'today':''}" data-level="${lvl}" title="${d} · ${v}项"></div>`;
+  });
+  return `
+    <div class="heatmap-card">
+      <div class="heatmap-head">
+        <div><div class="heatmap-title">📅 最近 90 天打卡热力图</div><div class="heatmap-sub">颜色越深 → 当天完成越多</div></div>
+        <div class="heat-legend">
+          少
+          <span style="background:#eceae0"></span>
+          <span style="background:#cfe1c9"></span>
+          <span style="background:#95b58a"></span>
+          <span style="background:#588157"></span>
+          <span style="background:#344e41"></span>
+          多
+        </div>
+      </div>
+      <div class="heatmap-grid">${cells}</div>
+    </div>`;
+}
+
+function notesCard(modId){
+  const k = todayKey(modId);
+  const val = state.notes[k] || '';
+  return `
+    <div class="notes-card">
+      <div class="notes-head"><div class="notes-title">📝 今日心得</div><span style="font-size:11px;color:#8b8579;">自动保存</span></div>
+      <textarea class="notes-area" data-key="${k}" placeholder="今天学到什么？客户问了什么？哪个术语没搞懂？记下来...">${esc(val)}</textarea>
+      <div class="notes-tip">💡 复盘是销售最好的老师，每晚花 3 分钟记录。</div>
+    </div>`;
+}
+
+/* ---------- LED Terms page ---------- */
+function pageTerms(mod){
+  const i = state.termIdx % LED_TERMS.length;
+  const t = LED_TERMS[i];
+  const sc = termScene(t.t);
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">已学术语</div><div class="num">${Math.min(state.termIdx+1, LED_TERMS.length)}<span>/${LED_TERMS.length}</span></div></div>
+      <div class="card"><div class="lbl">今日打卡</div><div class="num">${state.checkins[TODAY]||0}<span>项</span></div></div>
+      <div class="card"><div class="lbl">连续打卡</div><div class="num">${calcStreak()}<span>天</span></div></div>
+      <div class="card"><div class="lbl">累计打卡天数</div><div class="num">${Object.keys(state.checkins).length}<span>天</span></div></div>
+    </div>
+    <div class="flashcard" onclick="flipCard(this)" style="margin-bottom:18px;">
+      <div class="badge-row"><span>${t.cat}</span><span>点击翻面</span></div>
+      <div class="term">${t.t}</div>
+      <div class="phonetic">${t.p}</div>
+      <div class="meaning"><strong>中文：</strong>${t.m}</div>
+      <div class="detail"><strong>大白话：</strong>${t.d}<br><br><em>例：和客户介绍时可以说：${t.m}，也就是 ${t.d.slice(0,40)}...</em></div>
+      <div class="flip-hint">👆 点击看详解</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;">
+      <button class="btn-sync" onclick="prevTerm()">⬅ 上一个</button>
+      <button class="btn-sync" onclick="nextTerm()">下一个 ➡</button>
+      <button class="btn-sync" onclick="speak('${t.t}')">🔊 朗读</button>
+      <button class="btn-sync" onclick="markTermKnown()" style="background:#344e41;">✅ 学会了，打卡</button>
+    </div>
+    <div class="plan-card" style="margin-bottom:18px;">
+      <h3>🎬 场景图解</h3>
+      <div style="text-align:center;font-size:28px;letter-spacing:4px;padding:12px;background:#faf8f2;border-radius:10px;margin-bottom:10px;">${sc.emoji}</div>
+      <div style="font-size:13px;color:#4a4636;line-height:1.7;text-align:center;">${sc.desc}</div>
+    </div>
+    <div class="plan-card" style="margin-bottom:18px;">
+      <h3>💬 常用对话（中英对照）</h3>
+      <div style="background:#fff;border-radius:8px;padding:14px;margin-bottom:10px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇬🇧 English</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;white-space:pre-line;">${sc.dlgEn}</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:14px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇨🇳 中文翻译</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;white-space:pre-line;">${sc.dlgCn}</div>
+      </div>
+      <button class="btn-sync" onclick="speakDlgEn(${JSON.stringify(sc.dlgEn).replace(/"/g,'&quot;')})" style="margin-top:8px;font-size:12px;">🔊 朗读对话</button>
+    </div>
+    <div class="tasks-card">
+      ${taskListHTML('terms', [
+        {text:'学习 3 个新的 LED 后装术语', meta:'目标'},
+        {text:'把今天学的术语用自己的话讲一遍', meta:'输出'},
+        {text:'找 1 个产品页面对应今天学的术语', meta:'实战'},
+      ])}
+    </div>
+    ${notesCard('terms')}
+  `;
+}
+
+/* ---------- Cert page ---------- */
+function pageCert(mod){
+  const i = state.certIdx % CERTS.length;
+  const c = CERTS[i];
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">已学认证</div><div class="num">${Math.min(state.certIdx+1, CERTS.length)}<span>/${CERTS.length}</span></div></div>
+      <div class="card"><div class="lbl">今日打卡</div><div class="num">${state.checkins[TODAY]||0}<span>项</span></div></div>
+      <div class="card"><div class="lbl">欧洲认证</div><div class="num">${CERTS.filter(x=>x.market==='欧洲').length}<span>个</span></div></div>
+      <div class="card"><div class="lbl">新兴市场</div><div class="num">${CERTS.filter(x=>['巴西','尼日利亚','肯尼亚等东非','中东','沙特'].includes(x.market)).length}<span>个</span></div></div>
+    </div>
+    <div class="cert-card" style="margin-bottom:18px;">
+      <span class="tag">${c.market}</span>
+      <div class="code">${c.c}</div>
+      <div class="full">${c.full}</div>
+      <div class="plain"><strong>大白话：</strong>${c.plain}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;">
+      <button class="btn-sync" onclick="prevCert()">⬅ 上一个</button>
+      <button class="btn-sync" onclick="nextCert()">下一个 ➡</button>
+      <button class="btn-sync" onclick="markCertKnown()" style="background:#344e41;">✅ 记住了，打卡</button>
+    </div>
+    <div class="tasks-card">
+      <div class="tasks-title" style="margin-bottom:12px;">📋 本模块今日任务</div>
+      ${taskListHTML('cert', [
+        {text:'熟记 2 个认证缩写、全称、大白话含义', meta:'记忆'},
+        {text:'找出公司现有产品对应哪个认证', meta:'关联'},
+        {text:'准备 1 个向客户解释认证的话术', meta:'话术'},
+      ])}
+    </div>
+    ${notesCard('terms')}
+  `;
+}
+
+/* ---------- Social page ---------- */
+function pageSocial(mod){
+  return pageHeader(mod) + `
+    <div class="social-grid">
+      <div class="social-card">
+        <div class="icon">💼</div>
+        <h3>LinkedIn</h3>
+        <p>澳 / 新 / 欧洲采购决策者</p>
+        <ul>
+          <li>搜索 "LED headlight importer Australia"</li>
+          <li>查看 Automotive lighting buyer 职位</li>
+          <li>关注 5 个同行公司主页</li>
+          <li>评论/点赞 3 条客户动态</li>
+        </ul>
+      </div>
+      <div class="social-card">
+        <div class="icon">📘</div>
+        <h3>Facebook</h3>
+        <p>澳新欧汽修社群 & 经销商</p>
+        <ul>
+          <li>加入 "Auto parts Australia" 等群</li>
+          <li>看同行广告和爆款视频</li>
+          <li>收集 3 个潜在客户主页</li>
+          <li>留意招聘帖（找采购负责人）</li>
+        </ul>
+      </div>
+      <div class="social-card">
+        <div class="icon">▶️</div>
+        <h3>YouTube</h3>
+        <p>行业视频 & 安装测评</p>
+        <ul>
+          <li>搜 "LED headlight review 2026"</li>
+          <li>看竞品测评，记卖点/差评</li>
+          <li>找可合作的网红/测评人</li>
+          <li>收集视频素材灵感</li>
+        </ul>
+      </div>
+    </div>
+    ${taskListHTML('social', [
+      {text:'LinkedIn 刷 10 分钟澳新欧客户/同行动态', meta:'LinkedIn'},
+      {text:'Facebook 找 2 个澳新欧汽修社群加入', meta:'FB'},
+      {text:'YouTube 看 2 个 LED 车灯测评视频并记笔记', meta:'YouTube'},
+      {text:'保存 3 个潜在客户联系方式', meta:'获客'},
+      {text:'收集 2 条行业招聘信息（找采购负责人）', meta:'招聘'},
+      {text:'给客户/同行的 2 条动态点赞或评论', meta:'互动'},
+    ])}
+    ${notesCard('social')}
+  `;
+}
+
+/* ---------- IELTS page ---------- */
+function pageIELTS(mod){
+  const vi = (state.vocabIdx||0) % IELTS_VOCAB.length;
+  const vw = IELTS_VOCAB[vi];
+  const weekTasks = [
+    {d:'周一',t:'听力精听 1 篇 + 口语 Part1 话题'},
+    {d:'周二',t:'阅读 1 篇 + 写作 Task1 图表题'},
+    {d:'周三',t:'听力 Section 3/4 + 口语 Part2 卡片'},
+    {d:'周四',t:'阅读判断题专项 + 写作 Task2 议论文'},
+    {d:'周五',t:'听力真题 1 套 + 口语模拟 15 分钟'},
+    {d:'周六',t:'阅读真题 1 套 + 写作完整 1 大 1 小'},
+    {d:'周日',t:'模考半套 + 错题复盘 + 词汇复习'},
+  ];
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">目标分数</div><div class="num">6.5</div><div class="trend">稳扎稳打</div></div>
+      <div class="card"><div class="lbl">今日学习时长</div><div class="num" id="ieltsMin">0<span>分钟</span></div><div class="trend">目标 ≥ 90 分钟</div></div>
+      <div class="card"><div class="lbl">本周完成</div><div class="num">${state.ieltsProgress[TODAY]||0}<span>项</span></div></div>
+      <div class="card"><div class="lbl">连续打卡</div><div class="num">${calcStreak()}<span>天</span></div></div>
+    </div>
+    <div class="plan-card">
+      <h3>📅 周一至周日循环计划</h3>
+      <div class="ielts-week">
+        ${weekTasks.map(x=>`<div class="ielts-day"><div class="d">${x.d}</div><div class="t">${x.t}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>📚 雅思核心词汇 · 第 ${vi+1}/${IELTS_VOCAB.length} 个</h3>
+      <div class="flashcard" onclick="flipCard(this)" style="margin-bottom:14px;">
+        <div class="badge-row"><span>雅思6.5核心词</span><span>点击翻面</span></div>
+        <div class="term">${vw.t}</div>
+        <div class="phonetic">${vw.p}</div>
+        <div class="meaning"><strong>${vw.m}</strong></div>
+        <div class="detail"><strong>大白话：</strong>${vw.d}</div>
+        <div class="flip-hint">👆 点击看场景和例句</div>
+      </div>
+      <div style="text-align:center;font-size:28px;letter-spacing:4px;padding:12px;background:#faf8f2;border-radius:10px;margin-bottom:10px;">${vw.emoji}</div>
+      <div style="font-size:13px;color:#4a4636;line-height:1.7;text-align:center;margin-bottom:14px;">${vw.scene}</div>
+      <div style="background:#fff;border-radius:8px;padding:14px;margin-bottom:10px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇬🇧 例句</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;">${vw.dlgEn}</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:14px;margin-bottom:14px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇨🇳 翻译</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;">${vw.dlgCn}</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-sync" onclick="prevIeltsVocab()">⬅ 上一个</button>
+        <button class="btn-sync" onclick="nextIeltsVocab()">下一个 ➡</button>
+        <button class="btn-sync" onclick="speak('${vw.t}')">🔊 读单词</button>
+        <button class="btn-sync" onclick="speakDlgEn(${JSON.stringify(vw.dlgEn).replace(/"/g,'&quot;')})">🔊 读例句</button>
+        <button class="btn-sync" onclick="markIeltsVocabKnown()" style="background:#344e41;">✅ 学会了，打卡</button>
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>🗣️ 常考口语对话（中英对照）</h3>
+      <div style="font-size:12px;color:#8b8579;margin-bottom:12px;">雅思考官常问的话题，背熟这些就能应对大部分口语考试。</div>
+      ${IELTS_DIALOGUES.map((d,idx)=>`
+        <div style="background:#faf8f2;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #ece8db;">
+          <div style="font-size:13px;font-weight:bold;color:#3a5a40;margin-bottom:8px;">${d.emoji} ${d.topic}</div>
+          <div style="background:#fff;border-radius:6px;padding:10px;margin-bottom:8px;border:1px solid #ece8db;">
+            <div style="font-size:12px;color:#8b8579;margin-bottom:4px;">🇬🇧 English</div>
+            <div style="font-size:12px;line-height:1.7;color:#4a4636;white-space:pre-line;">${d.en}</div>
+          </div>
+          <div style="background:#fff;border-radius:6px;padding:10px;border:1px solid #ece8db;">
+            <div style="font-size:12px;color:#8b8579;margin-bottom:4px;">🇨🇳 中文翻译</div>
+            <div style="font-size:12px;line-height:1.7;color:#4a4636;white-space:pre-line;">${d.cn}</div>
+          </div>
+          <button class="btn-sync" onclick="speakDlgEn(${JSON.stringify(d.en).replace(/"/g,'&quot;')})" style="margin-top:6px;font-size:11px;padding:3px 8px;">🔊 朗读英文</button>
+        </div>
+      `).join('')}
+    </div>
+
+    ${taskListHTML('ielts', [
+      {text:'听力训练 30 分钟（真题/精听）', meta:'听力'},
+      {text:'阅读 1 篇学术文章 + 复盘错题', meta:'阅读'},
+      {text:'口语练习 15 分钟（录音/对镜/APP）', meta:'口语'},
+      {text:'写作 Task1 或 Task2 一篇并修改', meta:'写作'},
+      {text:'背诵 20 个雅思核心词汇 + 造句', meta:'词汇'},
+      {text:'跟读模仿 10 分钟（纠音/流利度）', meta:'发音'},
+    ])}
+    ${notesCard('ielts')}
+  `;
+}
+
+/* ---------- Biz English page ---------- */
+function pageBizEng(mod){
+  const i = state.bizIdx % BIZ_ENG.length;
+  const v = BIZ_ENG[i];
+  const sc = bizScene(v.t);
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">已学术语</div><div class="num">${Math.min(state.bizIdx+1, BIZ_ENG.length)}<span>/${BIZ_ENG.length}</span></div></div>
+      <div class="card"><div class="lbl">今日打卡</div><div class="num">${state.checkins[TODAY]||0}<span>项</span></div></div>
+      <div class="card"><div class="lbl">连续打卡</div><div class="num">${calcStreak()}<span>天</span></div></div>
+      <div class="card"><div class="lbl">累计打卡天数</div><div class="num">${Object.keys(state.checkins).length}<span>天</span></div></div>
+    </div>
+    <div class="flashcard" onclick="flipCard(this)" style="margin-bottom:18px;">
+      <div class="badge-row"><span>外贸商务英语</span><span>点击翻面</span></div>
+      <div class="term">${v.t}</div>
+      <div class="phonetic">${v.p}</div>
+      <div class="meaning"><strong>${v.m}</strong></div>
+      <div class="detail">${v.ex}<br><br><strong>实战：</strong>试着用这个术语给客户写一句话。</div>
+      <div class="flip-hint">👆 点击看例句</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;">
+      <button class="btn-sync" onclick="prevBiz()">⬅ 上一个</button>
+      <button class="btn-sync" onclick="nextBiz()">下一个 ➡</button>
+      <button class="btn-sync" onclick="speak('${v.t}')">🔊 朗读</button>
+      <button class="btn-sync" onclick="markBizKnown()" style="background:#344e41;">✅ 学会了，打卡</button>
+    </div>
+    <div class="plan-card" style="margin-bottom:18px;">
+      <h3>🎬 场景图解</h3>
+      <div style="text-align:center;font-size:28px;letter-spacing:4px;padding:12px;background:#faf8f2;border-radius:10px;margin-bottom:10px;">${sc.emoji}</div>
+      <div style="font-size:13px;color:#4a4636;line-height:1.7;text-align:center;">${sc.desc}</div>
+      <div style="background:#fff;border-radius:8px;padding:12px;margin-top:10px;border:1px solid #ece8db;">
+        <strong style="color:#3a5a40;font-size:12px;">🗣️ 大白话解释：</strong>
+        <span style="font-size:13px;color:#4a4636;">${sc.plain}</span>
+      </div>
+    </div>
+    <div class="plan-card" style="margin-bottom:18px;">
+      <h3>💬 常用对话（中英对照）</h3>
+      <div style="background:#fff;border-radius:8px;padding:14px;margin-bottom:10px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇬🇧 English</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;white-space:pre-line;">${sc.dlgEn}</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:14px;border:1px solid #ece8db;">
+        <div style="font-size:12px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇨🇳 中文翻译</div>
+        <div style="font-size:13px;line-height:1.8;color:#4a4636;white-space:pre-line;">${sc.dlgCn}</div>
+      </div>
+      <button class="btn-sync" onclick="speakDlgEn(${JSON.stringify(sc.dlgEn).replace(/"/g,'&quot;')})" style="margin-top:8px;font-size:12px;">🔊 朗读对话</button>
+    </div>
+    ${taskListHTML('bizeng', [
+      {text:'学习 2 个外贸商务英语术语', meta:'记忆'},
+      {text:'用今日术语写 1 封邮件/话术', meta:'输出'},
+      {text:'朗读 3 遍今日例句', meta:'口语'},
+    ])}
+    ${notesCard('bizeng')}
+  `;
+}
+
+/* ---------- Customer page ---------- */
+function pageCustomer(mod){
+  return pageHeader(mod) + `
+    <div class="module-intro" style="background:#fff;padding:18px 20px;border-radius:14px;border:1px solid #ece8db;margin-bottom:18px;font-size:13px;line-height:1.7;color:#4b4639;">
+      <strong>🤝 客户开发：</strong>主攻 <span style="color:#3a5a40;font-weight:600;">澳大利亚、新西兰、欧洲</span> 市场。
+      每天至少完成 3 个主动开发动作，把社媒情报变成客户线索。
+    </div>
+    ${taskListHTML('customer', [
+      {text:'LinkedIn 搜索 10 个澳新欧 Automotive buyer / Import manager', meta:'AU/NZ/EU'},
+      {text:'发送 3 封个性化 LinkedIn 好友申请/开发信', meta:'开发信'},
+      {text:'Facebook 收集 2 个澳新欧汽修社群或经销商主页', meta:'FB'},
+      {text:'YouTube 找 1 个可合作的测评网红并记录联系方式', meta:'网红'},
+      {text:'Alibaba / Made-in-China 回复 2 个 RFQ', meta:'询盘'},
+      {text:'给潜在客户发送 1 封介绍我司 LED 车灯优势的邮件', meta:'邮件'},
+      {text:'记录今日所有新客户线索到 Excel/CRM', meta:'归档'},
+    ])}
+    ${notesCard('customer')}
+  `;
+}
+
+/* ---------- Data page ---------- */
+function pageData(mod){
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">今日完成项</div><div class="num">${state.checkins[TODAY]||0}<span>项</span></div></div>
+      <div class="card"><div class="lbl">学习术语累计</div><div class="num">${state.termIdx + state.bizIdx}<span>个</span></div></div>
+      <div class="card"><div class="lbl">认证累计</div><div class="num">${state.certIdx}<span>个</span></div></div>
+      <div class="card"><div class="lbl">累计打卡天数</div><div class="num">${Object.keys(state.checkins).length}<span>天</span></div></div>
+    </div>
+    ${heatmapHTML()}
+    ${taskListHTML('data', [
+      {text:'统计今日学习：术语/认证/商务英语各多少个', meta:'学习'},
+      {text:'统计今日开发：新增客户线索 / 发出开发信 / 回复询盘', meta:'业务'},
+      {text:'记录明日 Top 3 优先事项', meta:'计划'},
+      {text:'本周复盘：哪些客户/市场值得加大投入', meta:'复盘'},
+    ])}
+    ${notesCard('data')}
+  `;
+}
+
+/* ---------- Memo page ---------- */
+function pageMemo(mod){
+  const k = `memo:${TODAY}`;
+  const val = state.notes[k] || '';
+  return pageHeader(mod) + `
+    <div class="notes-card" style="min-height:60vh;">
+      <div class="notes-head"><div class="notes-title">📝 备忘录 · 随时记录</div><span style="font-size:11px;color:#8b8579;">自动保存</span></div>
+      <textarea class="notes-area" data-key="${k}" style="min-height:50vh;" placeholder="客户话术、产品灵感、招聘线索、待办事项...">${esc(val)}</textarea>
+      <div class="notes-tip">💡 好记性不如烂笔头，重要信息建议同步 CRM。</div>
+    </div>
+  `;
+}
+
+/* ---------- Bilingual video scripts (CN+EN) ---------- */
+const videoScripts = [
+  {
+    day:"周一", topic:"LED术语 · Aftermarket", showTip:"拿一个LED车灯实物，边指边说",
+    cnHook:"做LED车灯出口的销售，今天给大家讲一个超基础但特别重要的词——Aftermarket",
+    cnPoints:[
+      "Aftermarket中文叫后装市场。什么意思呢？就是车子出厂之后，你自己去买配件改装的这部分市场。",
+      "我们做的LED车灯就是后装市场的。车主觉得原厂卤素灯不够亮，自己买我们的LED灯换上去，这就是Aftermarket。",
+      "跟它对应的是OEM，就是原厂件。原厂件贵，后装件性价比高，这就是我们做出口的市场空间。"
+    ],
+    cnCta:"你们的车灯是原厂的还是后换的？评论区告诉我！明天讲Canbus解码，关注不迷路。",
+    enHook:"I sell LED car lights for export. Today let me explain a super basic but important term — Aftermarket.",
+    enPoints:[
+      "Aftermarket means the market for parts you buy after your car leaves the factory. You buy them yourself and install them.",
+      "Our LED headlights are aftermarket products. Car owners replace dim factory halogen lights with our LED lights. That is the aftermarket.",
+      "The opposite is OEM — Original Equipment Manufacturer. OEM parts are expensive. Aftermarket gives you better value. That is our export opportunity."
+    ],
+    enCta:"Are your car lights original or aftermarket? Tell me in the comments! Tomorrow: Canbus decoding. Follow for more!"
+  },
+  {
+    day:"周二", topic:"商务英语 · MOQ & Lead Time", showTip:"拿一张报价单展示，边指边讲",
+    cnHook:"做外贸一定要知道的两个词，MOQ和Lead Time，今天一分钟讲清楚",
+    cnPoints:[
+      "MOQ就是Minimum Order Quantity，最小起订量。比如我们LED车灯MOQ是100套，就是说你最少得订100套，我才给你这个价格。",
+      "Lead Time就是交货周期。从你下单到我们发货要多久。我们一般是15到20天，这个一定要跟客户提前说清楚。",
+      "客户问的时候别慌，MOQ可以谈，Lead Time也可以商量。但一定要在报价时白纸黑字写清楚，不然后面扯皮。"
+    ],
+    cnCta:"你们做外贸最怕客户问什么？评论区聊聊！关注我，每天学一个外贸术语。",
+    enHook:"Two terms you MUST know in foreign trade: MOQ and Lead Time. Let me explain in one minute.",
+    enPoints:[
+      "MOQ means Minimum Order Quantity. For example, our LED headlight MOQ is 100 sets. That means you need to order at least 100 sets to get this price.",
+      "Lead Time is the delivery period. How long from your order to our shipment. Ours is usually 15 to 20 days. Always tell the customer upfront.",
+      "Do not panic when customers ask. MOQ is negotiable. Lead Time can be discussed. But always write it clearly in the quotation to avoid disputes later."
+    ],
+    enCta:"What question do you dread most from customers? Let us chat in the comments! Follow me to learn one trade term every day."
+  },
+  {
+    day:"周三", topic:"雅思口语 · Part 2 练习", showTip:"拿手机计时器，对着镜头说两分钟",
+    cnHook:"雅思目标6.5，今天练口语Part 2，主题是描述一个你熟悉的产品",
+    cnPoints:[
+      "Part 2会给你一张卡片，上面有话题，你要一个人说够两分钟。今天的话题是：Describe a product you know well.",
+      "我就拿我们LED车灯来练。开头说：I would like to talk about LED headlights that our company exports. 然后讲它的特点、你跟它的故事。",
+      "关键是说到两分钟不要停。我自己的办法是：先说是什么，再说为什么好，最后说一个真实故事，这样时间就够了。"
+    ],
+    cnCta:"你们雅思口语最怕什么话题？评论区告诉我，下期帮你们练！关注我一起考到6.5！",
+    enHook:"My IELTS goal is 6.5. Today I am practicing Speaking Part 2. The topic: describe a product you know well.",
+    enPoints:[
+      "In Part 2, you get a card with a topic. You need to speak for two minutes by yourself. Today: Describe a product you know well.",
+      "I will use our LED car lights to practice. Start with: I would like to talk about LED headlights that our company exports. Then talk about features and your story.",
+      "The key is to keep talking for two minutes without stopping. My trick: say what it is, why it is good, then tell a real story. That fills the time."
+    ],
+    enCta:"What speaking topic scares you the most? Tell me in the comments and I will help you practice next time! Follow me and let us hit 6.5 together!"
+  },
+  {
+    day:"周四", topic:"外贸日常 · 报价流程实操", showTip:"电脑屏幕展示报价单（客户信息打码）",
+    cnHook:"今天带你们看看外贸报价到底怎么报，从零开始走一遍",
+    cnPoints:[
+      "客户询盘来了，第一件事不是马上报价，是先搞清楚他要什么：什么型号、要多少、发到哪个国家、什么时候要。这叫需求确认。",
+      "然后算成本：产品成本加包装费加运费加利润。FOB就是到港价，CIF就是含保险到港价。一定要标清楚贸易术语。",
+      "报价单上必须有这7项：品名、型号、数量、单价、总价、贸易术语、交期。少一项客户都可能看不懂。"
+    ],
+    cnCta:"你们做报价最头疼什么？评论区告诉我！关注我，每天学一点外贸实操。",
+    enHook:"Today I will walk you through how to quote in foreign trade. From zero, step by step.",
+    enPoints:[
+      "When an inquiry comes in, do not rush to quote. First confirm what the customer wants: which model, how many, which country, when they need it. This is requirement confirmation.",
+      "Then calculate cost: product cost plus packaging plus shipping plus profit. FOB means price to port. CIF means price includes insurance to port. Always state the trade term clearly.",
+      "Your quotation MUST have these 7 items: product name, model, quantity, unit price, total price, trade term, and lead time. Missing any one can confuse the customer."
+    ],
+    enCta:"What is the hardest part of quoting for you? Let me know in the comments! Follow me for daily foreign trade tips."
+  },
+  {
+    day:"周五", topic:"认证讲解 · CE & E-Mark", showTip:"拿一个有CE标志的车灯包装盒，对着镜头展示",
+    cnHook:"做LED车灯出口，这两个认证你必须知道——CE和E-Mark",
+    cnPoints:[
+      "CE是欧盟的强制认证，卖到欧洲没有CE你的产品进都进不去。CE就是安全合格标志，证明你的产品符合欧盟标准。",
+      "E-Mark是专门给车用的认证，是欧洲经济委员会的法规。车灯上路必须有E-Mark，比CE更专业、更严格。",
+      "简单说：CE是基础门票，E-Mark是车灯的VIP通行证。两个都有，欧洲市场随便进。"
+    ],
+    cnCta:"你们出口遇到过认证问题吗？评论区聊聊！关注我，每周五讲一个认证。",
+    enHook:"If you export LED car lights, you MUST know these two certifications — CE and E-Mark.",
+    enPoints:[
+      "CE is a mandatory certification for the European market. Without CE, your product cannot even enter Europe. CE proves your product meets EU safety standards.",
+      "E-Mark is specifically for automotive products. It is a regulation from the Economic Commission for Europe. Car lights must have E-Mark to be road-legal. It is more specialized and stricter than CE.",
+      "Simply put: CE is your basic entry ticket. E-Mark is the VIP pass for car lights. Have both, and the European market is wide open."
+    ],
+    enCta:"Have you had certification issues in export? Let us chat in the comments! Follow me — every Friday, one certification explained."
+  },
+  {
+    day:"周六", topic:"行业资讯 · LED市场趋势", showTip:"手机展示行业新闻截图或数据图表",
+    cnHook:"2026年LED车灯后装市场到底怎么样？一分钟给你说清楚",
+    cnPoints:[
+      "全球LED车灯后装市场还在涨，特别是欧洲和南美。欧洲因为法规严要换合格的灯，南美是因为改装文化特别火。",
+      "现在的趋势是：CSP芯片越来越主流，因为它小、亮、散热好。还有Canbus解码也成了标配，因为新款车都带电脑检测。",
+      "竞争确实大，但机会也大。关键是产品要有认证、价格要合理、服务要快。这三点做到，不愁没客户。"
+    ],
+    cnCta:"你们觉得2026年哪个市场最好做？评论区投票！关注我每周六看行业。",
+    enHook:"What is the LED car light aftermarket looking like in 2026? Let me break it down in one minute.",
+    enPoints:[
+      "The global LED aftermarket is still growing, especially in Europe and South America. Europe because regulations require compliant lights. South America because car modification culture is huge.",
+      "Current trends: CSP chips are going mainstream because they are small, bright, and dissipate heat well. Canbus decoding is now standard because newer cars have computer detection.",
+      "Competition is real, but so is opportunity. The key is: certified products, reasonable pricing, and fast service. Nail these three and you will never lack customers."
+    ],
+    enCta:"Which market do you think is the best in 2026? Vote in the comments! Follow me every Saturday for industry insights."
+  },
+  {
+    day:"周日", topic:"周复盘 · 学习与工作总结", showTip:"对着镜头，旁边放笔记本展示一周记录",
+    cnHook:"外贸人一周复盘时间到了，看看这周我学了多少东西",
+    cnPoints:[
+      "这周学了5个术语：Aftermarket、MOQ、Lead Time、FOB、Canbus。5个认证：CE、E-Mark、RoHS、REACH、IP67。雅思练了5天口语。",
+      "工作上，这周回了12个询盘，报了5个价，跟进了8个老客户。有一个德国客户在谈第二批单子，下周可能成。",
+      "下周计划：重点跟进德国客户，继续练雅思口语，学3个新术语。拍5条视频，发到3个平台。"
+    ],
+    cnCta:"你们这周最大的收获是什么？评论区互相打气！关注我，一起成长。",
+    enHook:"Weekly review time! Let us see what I learned this week as a foreign trade salesperson.",
+    enPoints:[
+      "This week I learned 5 terms: Aftermarket, MOQ, Lead Time, FOB, and Canbus. 5 certifications: CE, E-Mark, RoHS, REACH, and IP67. And I practiced IELTS speaking for 5 days.",
+      "On the work side: I replied to 12 inquiries, sent 5 quotations, and followed up with 8 existing customers. A German client is talking about a second order — might close next week!",
+      "Next week plan: focus on the German client, keep practicing IELTS speaking, learn 3 new terms, and post 5 videos across 3 platforms."
+    ],
+    enCta:"What was your biggest win this week? Let us encourage each other in the comments! Follow me and let us grow together."
+  }
+];
+
+function switchScriptDay(i){
+  state.scriptDay = i;
+  saveState();
+  renderContent();
+}
+
+function copyVideoScript(i){
+  var s = videoScripts[i];
+  if(!s) return;
+  var lines = [];
+  lines.push("\u3010" + s.day + " \u00b7 " + s.topic + "\u3011");
+  lines.push("");
+  lines.push("\ud83c\udde8\ud83c\uddf3 \u4e2d\u6587\u6587\u6848");
+  lines.push("");
+  lines.push("\u5f00\u573a\uff1a" + s.cnHook);
+  s.cnPoints.forEach(function(p,j){ lines.push("\u7b2c" + (j+1) + "\u6bb5\uff1a" + p); });
+  lines.push("\u7ed3\u5c3e\uff1a" + s.cnCta);
+  lines.push("");
+  lines.push("\ud83c\uddec\ud83c\udde7 English Script");
+  lines.push("");
+  lines.push("Hook: " + s.enHook);
+  s.enPoints.forEach(function(p,j){ lines.push("Part " + (j+1) + ": " + p); });
+  lines.push("CTA: " + s.enCta);
+  var text = lines.join("\n");
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ toast("\ud83d\udccb \u6587\u6848\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f\uff01"); }).catch(function(){ toast("\u590d\u5236\u5931\u8d25\uff0c\u8bf7\u624b\u52a8\u9009\u62e9\u590d\u5236"); });
+  } else {
+    toast("\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u81ea\u52a8\u590d\u5236\uff0c\u8bf7\u624b\u52a8\u9009\u62e9\u6587\u6848\u590d\u5236");
+  }
+}
+
+function speakVideoScript(i){
+  var s = videoScripts[i];
+  if(!s) return;
+  var text = s.enHook + " " + s.enPoints.join(" ") + " " + s.enCta;
+  if("speechSynthesis" in window){
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = 0.9;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+    toast("\ud83d\udd0a \u6b63\u5728\u6717\u8bfb\u82f1\u6587\u6587\u6848...");
+  } else {
+    toast("\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u8bed\u97f3\u6717\u8bfb");
+  }
+}
+
+/* ---------- Video page ---------- */
+function pageVideo(mod){
+  var _sd = (state.scriptDay != null) ? state.scriptDay : (new Date().getDay()===0 ? 6 : new Date().getDay()-1);
+  var _vs = videoScripts[_sd] || videoScripts[0];
+  const weekTopics = [
+    {d:'周一',topic:'LED车灯专业术语（中英对照讲解）', tip:'比如：讲 Aftermarket 什么是后装市场，哪些 LED 车灯属于这个市场'},
+    {d:'周二',topic:'今日商务英语 + 外贸实操实拍', tip:'边拍工作流程边讲外贸英语，越真实越吸粉'},
+    {d:'周三',topic:'雅思学习打卡（跟读/写作/错题）', tip:'晒笔记、晒录音、晒学习过程，真实感最重要'},
+    {d:'周四',topic:'外贸工作日常 Vlog', tip:'拍接询盘、报价、和客户 Whatsapp 聊天的片段，打码保密'},
+    {d:'周五',topic:'认证讲解 + 产品知识', tip:'拿实物讲 CE/E-Mark/IP67，边展示车灯边说大白话'},
+    {d:'周六',topic:'行业资讯 / 竞品点评', tip:'截屏行业新闻/竞品视频，做一分钟专业解读'},
+    {d:'周日',topic:'本周复盘 + 下周计划', tip:'对着镜头总结一周学了多少术语、几个认证、成交进展'},
+  ];
+  const vidState = state.videos || {};
+  const todayVid = vidState[TODAY] || {shot:false, posted:{}};
+  const postedCount = Object.keys(todayVid.posted||{}).filter(k=>todayVid.posted[k]).length;
+  return pageHeader(mod) + `
+    <div class="stats">
+      <div class="card tinted"><div class="lbl">今日视频</div><div class="num">${todayVid.shot?'1<span>部</span>':'0<span>部</span>'}</div><div class="trend">${todayVid.shot?'已拍摄 ✓':'待拍摄'}</div></div>
+      <div class="card"><div class="lbl">今日已发布</div><div class="num">${postedCount}<span>平台</span></div><div class="trend">目标 3+ 平台</div></div>
+      <div class="card"><div class="lbl">本周发布</div><div class="num">${countWeekVideos(vidState)}<span>条</span></div></div>
+      <div class="card"><div class="lbl">累计发布</div><div class="num">${countTotalVideos(vidState)}<span>条</span></div></div>
+    </div>
+
+    <div class="plan-card">
+      <h3>📺 这周每天拍什么</h3>
+      <div class="ielts-week" style="grid-template-columns:repeat(7,1fr);">
+        ${weekTopics.map(x=>`
+          <div class="ielts-day" style="text-align:left;padding:12px;">
+            <div class="d">${x.d}</div>
+            <div class="t">${x.topic.slice(0,20)}...</div>
+            <div style="font-size:10px;color:#8b8579;margin-top:4px;line-height:1.4;">${x.tip}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>🎬 今日拍摄清单</h3>
+      <div class="plan-item">
+        <input type="checkbox" id="vidShot" ${todayVid.shot?'checked':''} onclick="toggleVideoShot()"/>
+        <div><strong>拍摄今日视频</strong><p>主题：${weekTopics[new Date().getDay()===0?6:new Date().getDay()-1].topic}</p></div>
+      </div>
+      <div class="plan-item">
+        <input type="checkbox" id="vidTik" ${todayVid.posted&&todayVid.posted.tiktok?'checked':''} onclick="toggleVideoPost('tiktok')"/>
+        <div><strong>发布到 TikTok / 抖音</strong><p>标题加 #LED车灯 #外贸英语 #外贸人 #AutoParts</p></div>
+      </div>
+      <div class="plan-item">
+        <input type="checkbox" id="vidYT" ${todayVid.posted&&todayVid.posted.youtube?'checked':''} onclick="toggleVideoPost('youtube')"/>
+        <div><strong>发布到 YouTube（Shorts）</strong><p>标题加英文版：LED Car Light, Foreign Trade English</p></div>
+      </div>
+      <div class="plan-item">
+        <input type="checkbox" id="vidLI" ${todayVid.posted&&todayVid.posted.linkedin?'checked':''} onclick="toggleVideoPost('linkedin')"/>
+        <div><strong>发布到 LinkedIn</strong><p>配一段专业说明：你的专业度就是客户找你下单的理由</p></div>
+      </div>
+      <div class="plan-item">
+        <input type="checkbox" id="vidFB" ${todayVid.posted&&todayVid.posted.facebook?'checked':''} onclick="toggleVideoPost('facebook')"/>
+        <div><strong>发布到 Facebook / Instagram Reels</strong><p>澳新欧汽修社群 + 车主群</p></div>
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>📝 视频脚本速记</h3>
+      <div style="margin-bottom:8px;font-size:12px;color:#8b8579;">记住一个简单公式：<strong>我是谁 + 今天学了什么 + 大白话讲解 + 真实展示 + 互动提问</strong></div>
+      <textarea class="notes-area" data-key="video:${TODAY}" style="min-height:120px;" placeholder="今天视频脚本：
+1. 开场 3 秒：'做LED车灯出口 3 年，今天给你们讲一个外贸术语...'
+2. 核心内容：...  ${weekTopics[new Date().getDay()===0?6:new Date().getDay()-1].topic}
+3. 结尾：'明天想看什么，评论区告诉我！'">${esc(state.notes['video:'+TODAY]||'')}</textarea>
+    </div>
+
+    <div class="plan-card">
+      <h3>📋 每日参考文案（中英对照 · 小白直接照着念）</h3>
+      <div style="margin-bottom:10px;font-size:12px;color:#8b8579;line-height:1.6;">不会写文案？直接照着念就行。先念中文，再念英文，一条视频就拍好了。点"复制文案"可一键复制到手机里对着念，点"朗读英文"可以听发音跟读。</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;">
+        ${videoScripts.map((s,i)=>`<button onclick="switchScriptDay(${i})" style="padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid ${i===_sd?'#3a5a40':'#ece8db'};background:${i===_sd?'#3a5a40':'#f0ede3'};color:${i===_sd?'#fff':'#8b8579'};">${s.day}</button>`).join('')}
+      </div>
+      <div style="background:#faf8f2;border-radius:12px;padding:16px;border:1px solid #ece8db;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="background:#3a5a40;color:#fff;padding:2px 10px;border-radius:6px;font-size:12px;">${_vs.day}</span>
+            <strong style="margin-left:8px;font-size:14px;color:#3a5a40;">${_vs.topic}</strong>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="copyVideoScript(${_sd})" style="padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #ece8db;background:#fff;color:#3a5a40;">📋 复制文案</button>
+            <button onclick="speakVideoScript(${_sd})" style="padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #ece8db;background:#fff;color:#3a5a40;">🔊 朗读英文</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#8b8579;margin-bottom:12px;background:#fff;padding:8px 12px;border-radius:6px;">💡 拍摄提示：${_vs.showTip}</div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇨🇳 中文文案（照着念就行）</div>
+          <div style="background:#fff;padding:14px;border-radius:8px;font-size:13px;line-height:2;color:#4a4636;">
+            <div style="margin-bottom:8px;"><strong>🎬 开场（3秒）：</strong>${_vs.cnHook}</div>
+            ${_vs.cnPoints.map((p,j)=>`<div style="margin-bottom:8px;"><strong>第${j+1}段：</strong>${p}</div>`).join('')}
+            <div><strong>🎯 结尾：</strong>${_vs.cnCta}</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:bold;color:#3a5a40;margin-bottom:6px;">🇬🇧 English Script</div>
+          <div style="background:#fff;padding:14px;border-radius:8px;font-size:13px;line-height:2;color:#4a4636;">
+            <div style="margin-bottom:8px;"><strong>🎬 Hook:</strong> ${_vs.enHook}</div>
+            ${_vs.enPoints.map((p,j)=>`<div style="margin-bottom:8px;"><strong>Part ${j+1}:</strong> ${p}</div>`).join('')}
+            <div><strong>🎯 CTA:</strong> ${_vs.enCta}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>🛠️ 拍摄技巧速查</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:12px;line-height:1.7;">
+        <div style="background:#faf8f2;padding:14px;border-radius:10px;border:1px solid #ece8db;">
+          <strong style="color:#3a5a40;">横竖都用</strong>
+          <p style="color:#6b6452;">TikTok/Reels 竖屏 9:16<br>YouTube/LinkedIn 横屏 16:9<br>一镜两版，不浪费素材</p>
+        </div>
+        <div style="background:#faf8f2;padding:14px;border-radius:10px;border:1px solid #ece8db;">
+          <strong style="color:#3a5a40;">字幕必加</strong>
+          <p style="color:#6b6452;">每句话自动生成字幕<br>关键词放大显示<br>静音播放的人也看得懂</p>
+        </div>
+        <div style="background:#faf8f2;padding:14px;border-radius:10px;border:1px solid #ece8db;">
+          <strong style="color:#3a5a40;">真实 > 完美</strong>
+          <p style="color:#6b6452;">不用美颜不用布景<br>对着产品实物讲更可信<br>"不完美"才有信任感</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-card">
+      <h3>🔖 推荐 Hashtags（按平台）</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+        <span style="padding:4px 10px;background:#fef3c7;border-radius:999px;font-size:11px;">#LEDHeadlight</span>
+        <span style="padding:4px 10px;background:#e8f0fb;border-radius:999px;font-size:11px;">#AutoParts</span>
+        <span style="padding:4px 10px;background:#e9f4ea;border-radius:999px;font-size:11px;">#ForeignTradeEnglish</span>
+        <span style="padding:4px 10px;background:#fbe8f0;border-radius:999px;font-size:11px;">#外贸人</span>
+        <span style="padding:4px 10px;background:#fbf2e3;border-radius:999px;font-size:11px;">#LED车灯</span>
+        <span style="padding:4px 10px;background:#d1fae5;border-radius:999px;font-size:11px;">#外贸英语</span>
+        <span style="padding:4px 10px;background:#dbeafe;border-radius:999px;font-size:11px;">#CarLighting</span>
+        <span style="padding:4px 10px;background:#f3e8fb;border-radius:999px;font-size:11px;">#自考雅思</span>
+        <span style="padding:4px 10px;background:#fef3c7;border-radius:999px;font-size:11px;">#Aftermarket</span>
+        <span style="padding:4px 10px;background:#e9f4ea;border-radius:999px;font-size:11px;">#ExportBusiness</span>
+        <span style="padding:4px 10px;background:#e8f0fb;border-radius:999px;font-size:11px;">#IELTSPreparation</span>
+        <span style="padding:4px 10px;background:#fbe8f0;border-radius:999px;font-size:11px;">#LearningJourney</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Video helpers ---------- */
+function toggleVideoShot(){
+  state.videos = state.videos || {};
+  state.videos[TODAY] = state.videos[TODAY] || {shot:false, posted:{}};
+  state.videos[TODAY].shot = !state.videos[TODAY].shot;
+  addCheckin();
+  saveState();
+  renderContent();
+  if (state.videos[TODAY].shot){ launchConfetti(); toast('🎬 视频已拍摄，坚持下去！'); }
+}
+function toggleVideoPost(platform){
+  state.videos = state.videos || {};
+  state.videos[TODAY] = state.videos[TODAY] || {shot:false, posted:{}};
+  state.videos[TODAY].posted[platform] = !state.videos[TODAY].posted[platform];
+  addCheckin();
+  saveState();
+  renderContent();
+  if (state.videos[TODAY].posted[platform]) toast('📱 已发布到 ' + platform);
+}
+function countWeekVideos(vs){
+  let c=0; for(let i=0;i<7;i++){ const d=new Date();d.setDate(d.getDate()-i); const k=d.toISOString().slice(0,10); if(vs[k]&&vs[k].shot) c++; } return c;
+}
+function countTotalVideos(vs){
+  return Object.values(vs||{}).filter(v=>v.shot).length;
+}
+
+/* ---------- Shared components ---------- */
+function taskListHTML(modId, tasks){
+  const k = todayKey(modId);
+  const doneMap = state.tasksDone[k] || {};
+  let done = 0;
+  let html = '<ul class="task-list">';
+  tasks.forEach((t,i) => {
+    const isDone = !!doneMap[i];
+    if (isDone) done++;
+    const mcls = t.meta ? (t.meta==='AU/NZ/EU'?'au':(t.meta==='EU'?'eu':'')) : '';
+    const realCls = mcls || (t.market||'');
+    html += `
+      <li class="task ${isDone?'done':''}" data-idx="${i}">
+        <input type="checkbox" ${isDone?'checked':''}/>
+        <span class="task-text">${t.text}</span>
+        ${t.meta?`<span class="task-meta ${realCls}">${t.meta}</span>`:''}
+      </li>`;
+  });
+  html += '</ul>';
+  const pct = tasks.length ? Math.round(done/tasks.length*100) : 0;
+  return `
+    <div class="tasks-card">
+      <div class="tasks-head">
+        <div><div class="tasks-title">✅ 今日任务</div></div>
+        <div style="display:flex;align-items:center;"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><span class="progress-text">${pct}%</span></div>
+      </div>
+      ${html}
+    </div>`;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ===========================================================
+   EVENTS
+   =========================================================== */
+function attachEvents(){
+  // task checkboxes
+  document.querySelectorAll('.task input[type="checkbox"]').forEach(box => {
+    box.onchange = function(){
+      const li = this.closest('.task');
+      const idx = parseInt(li.dataset.idx);
+      const modId = state.currentModule;
+      const k = todayKey(modId);
+      state.tasksDone[k] = state.tasksDone[k] || {};
+      state.tasksDone[k][idx] = this.checked;
+      li.classList.toggle('done', this.checked);
+      recalcCheckins();
+      saveState();
+      renderMenu();
+      if (this.checked) launchConfetti(this);
+      // if plan page item has jump, redirect
+      const jump = li.dataset.jump;
+      if (this.checked && jump && modId === 'plan') {
+        setTimeout(() => switchModule(jump), 400);
+      }
+    };
+  });
+
+  // notes
+  document.querySelectorAll('.notes-area').forEach(ta => {
+    ta.oninput = function(){
+      state.notes[this.dataset.key] = this.value;
+      saveState();
+    };
+  });
+}
+
+function recalcCheckins(){
+  // total today's checkins = sum of checked tasks across all modules + vocab/cert knowns
+  let total = 0;
+  for (const k in state.tasksDone) {
+    if (k.endsWith(':' + TODAY)) {
+      total += Object.values(state.tasksDone[k]).filter(Boolean).length;
+    }
+  }
+  state.checkins[TODAY] = total;
+}
+
+/* ===========================================================
+   FLASHCARD & VOCAB NAVIGATION
+   =========================================================== */
+function flipCard(el){ el.classList.toggle('flipped'); }
+function nextTerm(){ state.termIdx = (state.termIdx+1) % LED_TERMS.length; saveState(); renderContent(); }
+function prevTerm(){ state.termIdx = (state.termIdx-1+LED_TERMS.length) % LED_TERMS.length; saveState(); renderContent(); }
+function markTermKnown(){ state.termIdx = (state.termIdx+1) % LED_TERMS.length; addCheckin(); saveState(); renderAll(); toast('✓ LED术语打卡成功'); }
+
+function nextCert(){ state.certIdx = (state.certIdx+1) % CERTS.length; saveState(); renderContent(); }
+function prevCert(){ state.certIdx = (state.certIdx-1+CERTS.length) % CERTS.length; saveState(); renderContent(); }
+function markCertKnown(){ state.certIdx = (state.certIdx+1) % CERTS.length; addCheckin(); saveState(); renderAll(); toast('✓ 认证打卡成功'); }
+
+function nextBiz(){ state.bizIdx = (state.bizIdx+1) % BIZ_ENG.length; saveState(); renderContent(); }
+function prevBiz(){ state.bizIdx = (state.bizIdx-1+BIZ_ENG.length) % BIZ_ENG.length; saveState(); renderContent(); }
+function markBizKnown(){ state.bizIdx = (state.bizIdx+1) % BIZ_ENG.length; addCheckin(); saveState(); renderAll(); toast('✓ 商务英语打卡成功'); }
+
+function addCheckin(){ state.checkins[TODAY] = (state.checkins[TODAY] || 0) + 1; }
+
+function speak(text){
+  if (typeof speechSynthesis === 'undefined') return toast('当前环境不支持朗读');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.speak(u);
+  toast('🔊 朗读中');
+}
+
+function speakDlgEn(text){
+  if(!text) return;
+  try { text = JSON.parse(text); } catch(e) {}
+  if (typeof speechSynthesis === 'undefined') return toast('当前环境不支持朗读');
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  toast('🔊 正在朗读对话');
+}
+
+function nextIeltsVocab(){ state.vocabIdx = ((state.vocabIdx||0)+1) % IELTS_VOCAB.length; saveState(); renderContent(); }
+function prevIeltsVocab(){ state.vocabIdx = ((state.vocabIdx||0)-1+IELTS_VOCAB.length) % IELTS_VOCAB.length; saveState(); renderContent(); }
+function markIeltsVocabKnown(){ state.vocabIdx = ((state.vocabIdx||0)+1) % IELTS_VOCAB.length; addCheckin(); saveState(); renderAll(); toast('✓ 雅思词汇打卡成功'); }
+
+/* ===========================================================
+   SYNC & FX
+   =========================================================== */
+function syncToday(){ openSyncModal(); }
+
+function launchConfetti(origin){
+  let ox = window.innerWidth/2, oy = window.innerHeight/2;
+  if (origin && origin.getBoundingClientRect){
+    const r = origin.getBoundingClientRect();
+    ox = r.left + r.width/2; oy = r.top + r.height/2;
+  }
+  const colors = ['#3a5a40','#588157','#a3b18a','#f4a261','#e76f51','#2a9d8f','#e9c46a'];
+  for (let i=0;i<22;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.left = ox+'px'; c.style.top = oy+'px';
+    document.body.appendChild(c);
+    const angle = Math.random()*Math.PI*2;
+    const speed = 3 + Math.random()*5;
+    const vx = Math.cos(angle)*speed, vy = Math.sin(angle)*speed - 4;
+    let x=0,y=0,rot=0,frame=0; const life=50+Math.random()*25;
+    function step(){
+      frame++; x+=vx; y+=vy+frame*0.14; rot+=6;
+      c.style.transform = `translate(${x}px,${y}px) rotate(${rot}deg)`;
+      c.style.opacity = Math.max(0, 1-frame/life);
+      if (frame<life) requestAnimationFrame(step); else c.remove();
+    }
+    requestAnimationFrame(step);
+  }
+}
+
+function toast(text){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 1600);
+}
+
+/* ===========================================================
+   SYNC MODULE — 三种同步方式
+   =========================================================== */
+
+// 生成可导出的数据快照
+function getExportData(){
+  return {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    checkins: state.checkins || {},
+    tasksDone: state.tasksDone || {},
+    notes: state.notes || {},
+    termIdx: state.termIdx || 0,
+    certIdx: state.certIdx || 0,
+    bizIdx: state.bizIdx || 0,
+    vocabIdx: state.vocabIdx || 0,
+    ieltsProgress: state.ieltsProgress || {},
+    scriptDay: state.scriptDay || 0,
+    videos: state.videos || {},
+  };
+}
+
+// 把对象合并进 state（导入时用），按字段做合并
+function mergeData(data){
+  if(!data || typeof data !== 'object') return 0;
+  let count = 0;
+  const merge = (target, src) => {
+    if(!src) return;
+    Object.keys(src).forEach(k => {
+      if(src[k] !== null && src[k] !== undefined){
+        if(typeof src[k] === 'object' && !Array.isArray(src[k])){
+          target[k] = target[k] || {};
+          merge(target[k], src[k]);
+        } else {
+          target[k] = src[k];
+          count++;
+        }
+      }
+    });
+  };
+  if(data.checkins) merge(state.checkins, data.checkins);
+  if(data.tasksDone) merge(state.tasksDone, data.tasksDone);
+  if(data.notes) merge(state.notes, data.notes);
+  if(data.videos) merge(state.videos, data.videos);
+  if(data.ieltsProgress) merge(state.ieltsProgress, data.ieltsProgress);
+  if(typeof data.termIdx === 'number') state.termIdx = data.termIdx;
+  if(typeof data.certIdx === 'number') state.certIdx = data.certIdx;
+  if(typeof data.bizIdx === 'number') state.bizIdx = data.bizIdx;
+  if(typeof data.vocabIdx === 'number') state.vocabIdx = data.vocabIdx;
+  if(typeof data.scriptDay === 'number') state.scriptDay = data.scriptDay;
+  return count;
+}
+
+// 同步管理（QR码 + 文件 + 剪贴板，无需后端）
+let _cloudPushTimer = null;
+function scheduleCloudPush(){
+  // 自动云同步已禁用 - 所有同步通过手动 QR 码 / 文件 / 剪贴板
+  // 保留此函数以保持兼容（saveState 调用）
+}
+
+// 从云端拉取（保留为空实现，用于兼容 URL hash #cloud=）
+async function pullFromCloud(id){
+  // 当前实现：手动同步模式，不自动拉取
+  return null;
+}
+
+// 兼容旧 API
+async function pushToCloud(){
+  // 不做任何事 - 用户使用 QR 码或文件进行同步
+  return;
+}
+
+// 检测 URL hash 并导入
+async function checkURLHash(){
+  const h = location.hash || '';
+  let m;
+  if((m = h.match(/^#sync=([^&]+)/))){
+    // URL hash 带 #sync=<base64> 进入 → 询问是否导入
+    try {
+      const encoded = m[1];
+      const json = decodeURIComponent(escape(atob(encoded)));
+      const data = JSON.parse(json);
+      if(confirm('检测到来自其他设备的备份数据，要导入吗？\n（导入会与本地数据合并）')){
+        mergeData(data);
+        saveState();
+        renderAll();
+        toast('✓ 数据已导入');
+        launchConfetti();
+      }
+    } catch(e){ console.warn('hash sync failed', e); }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
+// 打开同步弹窗
+function openSyncModal(){
+  const lastExport = state.lastExportAt ? new Date(state.lastExportAt).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '—';
+  const statusHTML = `<div class="sync-status off">📡 数据通过 QR 码 / 文件同步（无需云端账号）<br/>最近导出: ${lastExport}</div>`;
+
+  const modalHTML = `
+    <div class="sync-modal-bg" onclick="closeSyncModal(event)">
+      <div class="sync-modal" onclick="event.stopPropagation()">
+        <div class="sync-head">
+          <div class="sync-title">📱 数据同步（电脑 ↔ 手机）</div>
+          <button class="sync-close" onclick="closeSyncModal()">✕</button>
+        </div>
+        ${statusHTML}
+
+        <div class="sync-section">
+          <div class="sync-section-title">📤 发送到手机（推荐）</div>
+          <div class="sync-section-desc">电脑点击下方按钮，手机微信/相机扫码即同步</div>
+          <div class="sync-btn-row">
+            <button class="sync-btn primary" onclick="doShowQR()">📱 显示二维码</button>
+          </div>
+        </div>
+
+        <div class="sync-section">
+          <div class="sync-section-title">🔗 链接 / 剪贴板同步</div>
+          <div class="sync-section-desc">复制链接，粘贴到手机浏览器；或复制 JSON 文本到另一设备</div>
+          <div class="sync-btn-row">
+            <button class="sync-btn primary" onclick="doCopyShareLink()">🔗 复制链接</button>
+            <button class="sync-btn" onclick="doCopyJSON()">📋 复制 JSON 文本</button>
+          </div>
+        </div>
+
+        <div class="sync-section">
+          <div class="sync-section-title">💾 文件备份</div>
+          <div class="sync-section-desc">下载到本地保存，或上传 JSON 还原数据</div>
+          <div class="sync-btn-row">
+            <button class="sync-btn primary" onclick="doDownloadFile()">💾 下载备份</button>
+            <button class="sync-btn" onclick="doUploadFile()">📂 上传恢复</button>
+          </div>
+        </div>
+
+        <div class="sync-section">
+          <div class="sync-section-title">📥 在手机上导入</div>
+          <div class="sync-section-desc">手机上访问页面后，导入电脑发来的数据</div>
+          <div class="sync-btn-row">
+            <button class="sync-btn primary" onclick="doUploadFile()">📂 选择文件</button>
+            <button class="sync-btn" onclick="doPasteJSON()">📋 粘贴 JSON</button>
+          </div>
+        </div>
+
+        <div class="sync-tip">
+          💡 <b>最简流程</b>：电脑点"显示二维码" → 手机微信扫码 → 自动打开链接 → 数据导入完成
+        </div>
+      </div>
+    </div>
+  `;
+  let el = document.getElementById('syncModal');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'syncModal';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = modalHTML;
+}
+
+function closeSyncModal(e){
+  if(e && e.target !== e.currentTarget) return;
+  const el = document.getElementById('syncModal');
+  if(el) el.innerHTML = '';
+}
+
+// ====== 文件操作 ======
+function doDownloadFile(){
+  try {
+    const data = JSON.stringify(getExportData(), null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `汗马工作台-${TODAY}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    state.lastExportAt = new Date().toISOString();
+    saveState();
+    toast('✓ JSON 文件已下载');
+  } catch(e){
+    toast('下载失败：' + e.message);
+  }
+}
+
+function doCopyShareLink(){
+  try {
+    const data = JSON.stringify(getExportData());
+    const encoded = btoa(unescape(encodeURIComponent(data)));
+    const url = location.origin + location.pathname + '#sync=' + encoded;
+    state.lastExportAt = new Date().toISOString();
+    saveState();
+    copyText(url, '分享链接已复制（粘贴到手机浏览器即可导入）');
+  } catch(e){
+    toast('生成链接失败：' + e.message);
+  }
+}
+
+function doCopyJSON(){
+  try {
+    const data = JSON.stringify(getExportData(), null, 2);
+    state.lastExportAt = new Date().toISOString();
+    saveState();
+    copyText(data, 'JSON 数据已复制');
+  } catch(e){
+    toast('复制失败：' + e.message);
+  }
+}
+
+function doShowQR(){
+  try {
+    // 把数据压缩到最小体积（QR 码 URL 限制 ~2KB）
+    const slim = {
+      v: 2,
+      c: state.checkins || {},
+      td: state.tasksDone || {},
+      n: state.notes || {},
+      ti: state.termIdx, ci: state.certIdx, bi: state.bizIdx,
+      vi: state.vocabIdx, sd: state.scriptDay,
+      ip: state.ieltsProgress || {},
+      vs: state.videos || {},
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
+    const shareURL = location.origin + location.pathname + '#sync=' + encoded;
+    const urlLen = shareURL.length;
+    const apiURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(shareURL)}`;
+
+    const modalEl = document.getElementById('syncModal');
+    modalEl.innerHTML = `
+      <div class="sync-modal-bg" onclick="closeSyncModal(event)">
+        <div class="sync-modal" onclick="event.stopPropagation()">
+          <div class="sync-head">
+            <div class="sync-title">📱 用手机扫码导入</div>
+            <button class="sync-close" onclick="closeSyncModal()">✕</button>
+          </div>
+          <div class="sync-qr-box">
+            <img src="${apiURL}" alt="QR Code" onerror="this.style.display='none';document.getElementById('qrFallback').style.display='block';" />
+            <div id="qrFallback" style="display:none;padding:20px;background:#fee;border-radius:8px;color:#c1452d;">
+              ⚠️ 二维码生成失败，请改用下方"复制链接"按钮
+            </div>
+            <div class="sync-qr-hint">
+              📲 手机微信 / 浏览器 / 相册扫码<br/>
+              打开链接后会自动导入数据<br/>
+              <small style="color:#a8a094;">（数据大小: ${(urlLen/1024).toFixed(1)}KB · 仅本设备的浏览器使用）</small>
+            </div>
+            <div class="sync-btn-row" style="margin-top:14px;">
+              <button class="sync-btn primary" onclick="doCopyShareLink()">🔗 复制链接</button>
+              <button class="sync-btn" onclick="doDownloadFile()">💾 下载文件</button>
+              <button class="sync-btn" onclick="openSyncModal()">↩ 返回</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    state.lastExportAt = new Date().toISOString();
+    saveState();
+  } catch(e){
+    toast('生成二维码失败：' + e.message);
+  }
+}
+
+// ====== 导入操作 ======
+function doUploadFile(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if(confirm('确认导入这份数据吗？\n将与当前数据合并（按时间戳取最新）。')){
+          const n = mergeData(data);
+          saveState();
+          renderAll();
+          toast(`✓ 已合并 ${n} 项数据`);
+          closeSyncModal();
+        }
+      } catch(err){
+        toast('文件格式错误：' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function doPasteJSON(){
+  const json = prompt('粘贴 JSON 数据（来自其他设备的备份）：');
+  if(!json) return;
+  try {
+    const data = JSON.parse(json);
+    if(confirm('确认导入这份数据吗？\n将与当前数据合并。')){
+      const n = mergeData(data);
+      saveState();
+      renderAll();
+      toast(`✓ 已合并 ${n} 项数据`);
+      closeSyncModal();
+    }
+  } catch(e){
+    toast('JSON 格式错误：' + e.message);
+  }
+}
+
+// 通用复制工具
+function copyText(text, okMsg){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(
+      () => toast('✓ ' + (okMsg || '已复制')),
+      () => fallbackCopy(text, okMsg)
+    );
+  } else {
+    fallbackCopy(text, okMsg);
+  }
+}
+function fallbackCopy(text, okMsg){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('✓ ' + (okMsg || '已复制')); }
+  catch(e){ prompt('请手动复制：', text); }
+  document.body.removeChild(ta);
+}
+
+// 每日计划页增加同步状态卡片
+function syncStatusCard(){
+  const lastExport = state.lastExportAt ? new Date(state.lastExportAt).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : null;
+  return `
+    <div class="sync-card-row">
+      <div class="sync-card-info">
+        <b>📱 同步到手机</b>
+        <span>${lastExport ? `最近导出: ${lastExport}` : '电脑和手机数据独立，点击右侧按钮把进度发到手机'}</span>
+      </div>
+      <button onclick="doShowQR()">📱 二维码同步</button>
+    </div>
+  `;
+}
+
+/* ===========================================================
+   INIT
+   =========================================================== */
+function renderAll(){
+  try {
+    renderTopBar();
+    renderMenu();
+    renderContent();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('content').innerHTML = '<p style="padding:20px;color:#8b8579;">加载出错，请刷新重试。</p>';
+  }
+}
+
+// Ensure DOM ready
+document.addEventListener('DOMContentLoaded', () => { checkURLHash().then(()=>renderAll()); });
+// fallback if DOMContentLoaded already fired
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(() => { checkURLHash().then(()=>renderAll()); }, 1);
+}
+setInterval(() => {
+  const cl = document.getElementById('clock');
+  if (cl) cl.textContent = new Date().toTimeString().slice(0,5);
+}, 30000);
+</script>
+</body>
+</html>
+
